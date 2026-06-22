@@ -184,7 +184,7 @@ function star_wars:register_lightsaber(hilt, color)
     -- Single Blade Lightsaber
 
     if hilt == "single" then
-        minetest.register_tool("star_wars:lightsaber_single_" .. color .. "_off", {
+        minetest.register_craftitem("star_wars:lightsaber_single_" .. color .. "_off", {
             description = color:gsub("^%l", string.upper) .. " Lightsaber",
             inventory_image = "hilt_single.png",
             stack_max = 1,
@@ -197,7 +197,7 @@ function star_wars:register_lightsaber(hilt, color)
             end,
         })
 
-        minetest.register_tool("star_wars:lightsaber_single_" .. color .. "_on", {
+        minetest.register_craftitem("star_wars:lightsaber_single_" .. color .. "_on", {
             description = color:gsub("^%l", string.upper) .. " Lightsaber",
             inventory_image = "hilt_single.png",
             wield_image = "blade_single_" .. color .. ".png^lightsaber_single.png",
@@ -237,7 +237,7 @@ function star_wars:register_lightsaber(hilt, color)
     -- Crossguarded Lightsaber
 
     if hilt == "cross" then
-        minetest.register_tool("star_wars:lightsaber_cross_" .. color .. "_off", {
+        minetest.register_craftitem("star_wars:lightsaber_cross_" .. color .. "_off", {
             description = color:gsub("^%l", string.upper) .. " Crossguarded Lightsaber",
             inventory_image = "hilt_cross.png",
             stack_max = 1,
@@ -249,7 +249,7 @@ function star_wars:register_lightsaber(hilt, color)
             end,
         })
 
-        minetest.register_tool("star_wars:lightsaber_cross_" .. color .. "_on", {
+        minetest.register_craftitem("star_wars:lightsaber_cross_" .. color .. "_on", {
             description = color:gsub("^%l", string.upper) .. " Crossguarded Lightsaber",
             inventory_image = "hilt_cross.png",
             wield_image = "blade_cross_" .. color .. ".png^lightsaber_cross.png",
@@ -289,7 +289,7 @@ function star_wars:register_lightsaber(hilt, color)
     -- Double Bladed Lightsaber
 
     if hilt == "double" then
-        minetest.register_tool("star_wars:lightsaber_double_" .. color .. "_off", {
+        minetest.register_craftitem("star_wars:lightsaber_double_" .. color .. "_off", {
             description = color:gsub("^%l", string.upper) .. " Double Bladed Lightsaber",
             inventory_image = "hilt_double.png",
             stack_max = 1,
@@ -301,7 +301,7 @@ function star_wars:register_lightsaber(hilt, color)
             end,
         })
 
-        minetest.register_tool("star_wars:lightsaber_double_" .. color .. "_on", {
+        minetest.register_craftitem("star_wars:lightsaber_double_" .. color .. "_on", {
             description = color:gsub("^%l", string.upper) .. " Double Bladed Lightsaber",
             inventory_image = "hilt_double.png",
             wield_image = "blade_double_" .. color .. ".png^lightsaber_double.png",

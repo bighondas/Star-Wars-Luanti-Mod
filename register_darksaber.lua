@@ -129,7 +129,7 @@ minetest.register_globalstep(function(dtime)
     end
 end)
 
-minetest.register_tool("star_wars:darksaber_off", {
+minetest.register_craftitem("star_wars:darksaber_off", {
     description = "Darksaber",
     inventory_image = "darksaber_hilt_inv.png",
     stack_max = 1,
@@ -141,7 +141,7 @@ minetest.register_tool("star_wars:darksaber_off", {
     end,
 })
 
-minetest.register_tool("star_wars:darksaber_on", {
+minetest.register_craftitem("star_wars:darksaber_on", {
     description = "Darksaber",
     inventory_image = "darksaber_hilt_inv.png",
     wield_image = "blade_darksaber.png^darksaber_hilt.png",

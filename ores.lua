@@ -46,33 +46,33 @@ minetest.register_ore({
     ore_type       = "scatter",
     ore            = "star_wars:kyber_ore",
     wherein        = "default:stone",
-    clust_scarcity = 9 * 9 * 9,   
-    clust_num_ores = 14,
+    clust_scarcity = 13 * 13 * 13,
+    clust_num_ores = 10,
     clust_size     = 3,
-    y_max          = 31000,
-    y_min          = 1025,
+    y_max          = 0,
+    y_min          = -32,
 })
 
 minetest.register_ore({
     ore_type       = "scatter",
     ore            = "star_wars:laser_core_ore",
     wherein        = "default:stone",
-    clust_scarcity = 9 * 9 * 9,
+    clust_scarcity = 13 * 13 * 13,
     clust_num_ores = 10,
     clust_size     = 3,
-    y_max          = 31000,
-    y_min          = 800,
+    y_max          = 0,
+    y_min          = -32,
 })
 
 minetest.register_ore({
     ore_type       = "scatter",
     ore            = "star_wars:beskar_ore",
     wherein        = "default:stone",
-    clust_scarcity = 13 * 13 * 13,  
-    clust_num_ores = 5,
-    clust_size     = 4,
-    y_max          = 31000,
-    y_min          = 1025,
+    clust_scarcity = 13 * 13 * 13,
+    clust_num_ores = 10,
+    clust_size     = 3,
+    y_max          = 0,
+    y_min          = -32,
 })
 
 minetest.register_ore({

@@ -264,7 +264,7 @@ minetest.register_entity("star_wars:laser", {
 
 local BLASTER_COOLDOWN = 0.5
 
-minetest.register_tool("star_wars:blaster", {
+minetest.register_craftitem("star_wars:blaster", {
     stack_max = 1,
     description = "Blaster",
     inventory_image = "blaster.png",
@@ -324,7 +324,7 @@ minetest.register_tool("star_wars:blaster", {
 
 local AUTO_BLASTER_COOLDOWN = 0.1
 
-minetest.register_tool("star_wars:auto_blaster", {
+minetest.register_craftitem("star_wars:auto_blaster", {
     stack_max = 1,
     description = "Auto Blaster",
     inventory_image = "auto_blaster.png",
