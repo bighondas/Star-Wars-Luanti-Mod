@@ -383,6 +383,7 @@ local function fire_blaster(self, driver)
         if ent then
             ent.shooter = driver
             ent.speed   = BLASTER_SPEED
+            ent.shooter_vehicle = self.object
             ent.damage  = BLASTER_DAMAGE
         end
 
