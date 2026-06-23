@@ -453,15 +453,16 @@ local function vehicle_on_punch(self, puncher, time_from_last_punch, tool_capabi
         end
     end
 
+    if is_valid_player(puncher) and is_wrench(puncher) then
+        vehicle_break_no_explosion(self)
+        return
+    end
+
     self._vehicle_hp = (self._vehicle_hp or self._max_hp) - dmg
     flash_damage(self)
 
     if self._vehicle_hp <= 0 then
-        if is_valid_player(puncher) and is_wrench(puncher) then
-            vehicle_break_no_explosion(self)
-        else
-            vehicle_explode(self)
-        end
+        vehicle_explode(self)
     end
 end
 
