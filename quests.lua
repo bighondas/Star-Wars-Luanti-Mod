@@ -26,7 +26,7 @@ star_wars.quest_defs = {
         },
         {
             rank = "Knight",
-            title = "Your First Lightsaber",
+            title = "Lightsaber",
             desc = "Return to Yoda while holding an open lightsaber.",
             objective = "talk_with_open_lightsaber",
             need = 1,
@@ -34,9 +34,9 @@ star_wars.quest_defs = {
         },
         {
             rank = "Master",
-            title = "Sense",
-            desc = "Use Force Sense on a Jedi player.",
-            objective = "sense_jedi",
+            title = "Defeat a Sith",
+            desc = "Kill 1 Sith.",
+            objective = "kill_enemy",
             need = 1,
             master = "Yoda",
         },
@@ -103,7 +103,7 @@ star_wars.quest_dialogue = {
         [1] = "Strong in the Force, you are. Found me, you have. Begin your training, we shall.",
         [2] = "Fast you must be. Use Dash three times, you will.",
         [3] = "Crystal Bond, you have earned. A Blank Kyber Crystal, hold you must. Color it, then a hilt combine. Return to me with it opened, you will.",
-        [4] = "Growing stronger, your connection with the Force is. Sense a fellow Jedi, you must. A Master, you shall become.",
+        [4] = "Growing stronger, your connection with the Force is. A Sith, you must kill. A Master, you shall become.",
         [5] = "Your final trial, this is. Sense a Sith, then defeat them. Taught you everything, I have.",
     },
 
@@ -219,23 +219,65 @@ end
 function star_wars.save_quest_state(name, state)
     local meta = get_meta(name)
     if not meta then return end
+    local faction = star_wars.get_faction(name)
+    local prefix = faction and ("star_wars:" .. faction .. "_") or "star_wars:"
 
-    meta:set_int("star_wars:quest_index", state.index or 1)
-    meta:set_int("star_wars:quest_progress", state.progress or 0)
-    meta:set_int("star_wars:quest_accepted", state.accepted and 1 or 0)
-    meta:set_string("star_wars:quest_master", state.master or "")
-    meta:set_string("star_wars:sensed_sith_target", state.sensed_sith_target or "")
-    meta:set_int("star_wars:choke_kills", state.choke_kills or 0)
-    meta:set_int("star_wars:lightning_kills", state.lightning_kills or 0)
+    meta:set_int(prefix .. "quest_index", state.index or 1)
+    meta:set_int(prefix .. "quest_progress", state.progress or 0)
+    meta:set_int(prefix .. "quest_accepted", state.accepted and 1 or 0)
+    meta:set_string(prefix .. "quest_master", state.master or "")
+    meta:set_string(prefix .. "sensed_sith_target", state.sensed_sith_target or "")
+    meta:set_int(prefix .. "choke_kills", state.choke_kills or 0)
+    meta:set_int(prefix .. "lightning_kills", state.lightning_kills or 0)
 end
 
-function star_wars.reset_quest_flags(state)
-    state.sensed_sith_target = ""
-    state.choke_kills = 0
-    state.lightning_kills = 0
+function star_wars.get_quest_state(name)
+    local meta = get_meta(name)
+    if not meta then return nil end
+    local faction = star_wars.get_faction(name)
+    local prefix = faction and ("star_wars:" .. faction .. "_") or "star_wars:"
+
+    local index = meta:get_int(prefix .. "quest_index")
+
+    if index <= 0 then
+        local state = {
+            index = 1,
+            progress = 0,
+            accepted = false,
+            master = "",
+            sensed_sith_target = "",
+            choke_kills = 0,
+            lightning_kills = 0,
+        }
+        star_wars.save_quest_state(name, state)
+        return state
+    end
+
+    return {
+        index = index,
+        progress = meta:get_int(prefix .. "quest_progress"),
+        accepted = meta:get_int(prefix .. "quest_accepted") == 1,
+        master = meta:get_string(prefix .. "quest_master"),
+        sensed_sith_target = meta:get_string(prefix .. "sensed_sith_target"),
+        choke_kills = meta:get_int(prefix .. "choke_kills"),
+        lightning_kills = meta:get_int(prefix .. "lightning_kills"),
+    }
 end
 
 function star_wars.reset_player_quests(name)
+    -- Μόνο reset αν δεν υπάρχει ήδη saved state για αυτό το faction
+    local meta = get_meta(name)
+    if not meta then return end
+    local faction = star_wars.get_faction(name)
+    local prefix = faction and ("star_wars:" .. faction .. "_") or "star_wars:"
+
+    local existing = meta:get_int(prefix .. "quest_index")
+    if existing and existing >= 1 then
+        -- Υπάρχει ήδη state, μην το σβήσεις
+        star_wars.update_quest_hud(name)
+        return
+    end
+
     local state = {
         index = 1,
         progress = 0,
@@ -249,6 +291,12 @@ function star_wars.reset_player_quests(name)
     if star_wars.clear_quest_hud then
         star_wars.clear_quest_hud(name)
     end
+end
+
+function star_wars.reset_quest_flags(state)
+    state.sensed_sith_target = ""
+    state.choke_kills = 0
+    state.lightning_kills = 0
 end
 
 function star_wars.get_active_quest(name)
