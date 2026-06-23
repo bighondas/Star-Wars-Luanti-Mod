@@ -223,7 +223,6 @@ local function set_faction(player, faction)
     storage:set_string("faction_" .. name, faction)
     load_rank(name, faction)
 
-    -- Fix #1: έλεγχος ύπαρξης πριν χρήση των globals από force_abilities.lua
     if force_ability then
         force_ability[name] = "None"
     end
@@ -265,7 +264,6 @@ minetest.register_chatcommand("team", {
 
 		if param == "jedi" or param == "sith" then
 			set_faction(player, param)
-            star_wars.reset_player_quests(name)
             star_wars.update_quest_hud(name)
 			return true, "Faction set to " .. param
 		elseif param == "" then
