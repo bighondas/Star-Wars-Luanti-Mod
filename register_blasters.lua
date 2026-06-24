@@ -263,6 +263,47 @@ end,
 
 local BLASTER_COOLDOWN = 0.5
 
+local function shoot_blaster(itemstack, user)
+    if not user then return itemstack end
+
+    local now = minetest.get_us_time() / 1000000
+    local meta = itemstack:get_meta()
+    local last_shot = meta:get_float("last_shot")
+
+    if now - last_shot < BLASTER_COOLDOWN then
+        return itemstack
+    end
+    meta:set_float("last_shot", now)
+    user:get_inventory():set_stack("main", user:get_wield_index(), itemstack)
+
+    local pos = vector.copy(user:get_pos())
+    local dir = user:get_look_dir()
+    pos.y = pos.y + 1.5
+    pos = vector.add(pos, vector.multiply(dir, 1.2))
+
+    local obj = minetest.add_entity(pos, "star_wars:laser")
+    if obj then
+        local lua = obj:get_luaentity()
+        if lua then
+            lua.shooter = user
+            lua.last_pos = vector.new(pos)
+            lua.damage = 2
+            lua.vehicle_damage = 2
+            lua.speed = 40
+        end
+        obj:set_velocity(vector.multiply(dir, 40))
+        obj:set_acceleration({x = 0, y = 0, z = 0})
+    end
+
+    minetest.sound_play("star_wars_blaster_shot", {
+        object = user,
+        gain = 1.0,
+        max_hear_distance = 24,
+    })
+
+    return itemstack
+end
+
 minetest.register_craftitem("star_wars:blaster", {
     stack_max = 1,
     description = "Blaster",
@@ -272,49 +313,8 @@ minetest.register_craftitem("star_wars:blaster", {
     _vehicle_damage = 2,
     _speed = 40,
 
-    on_use = function(itemstack, user, pointed_thing)
-        if not user then
-            return itemstack
-        end
-
-        local now = minetest.get_us_time() / 1000000
-        local meta = itemstack:get_meta()
-        local last_shot = meta:get_float("last_shot")
-
-        if now - last_shot < BLASTER_COOLDOWN then
-            return itemstack
-        end
-        meta:set_float("last_shot", now)
-
-        local pos = vector.copy(user:get_pos())
-        local dir = user:get_look_dir()
-
-        pos.y = pos.y + 1.5
-        pos = vector.add(pos, vector.multiply(dir, 1.2))
-
-        local obj = minetest.add_entity(pos, "star_wars:laser")
-               if obj then
-            local lua = obj:get_luaentity()
-            if lua then
-                lua.shooter = user
-                lua.last_pos = vector.new(pos)
-                lua.damage = 2
-                lua.vehicle_damage = 2
-                lua.speed = 40
-            end
-
-            obj:set_velocity(vector.multiply(dir, 40))
-            obj:set_acceleration({x = 0, y = 0, z = 0})
-        end
-
-        minetest.sound_play("star_wars_blaster_shot", {
-            object = user,
-            gain = 1.0,
-            max_hear_distance = 24,
-        })
-
-        return itemstack
-    end,
+    on_use  = function(itemstack, user, pointed_thing) return shoot_blaster(itemstack, user) end,
+    on_place = function(itemstack, user, pointed_thing) return shoot_blaster(itemstack, user) end,
 })
 
 --==========================
@@ -322,6 +322,47 @@ minetest.register_craftitem("star_wars:blaster", {
 --==========================
 
 local AUTO_BLASTER_COOLDOWN = 0.1
+
+local function shoot_auto_blaster(itemstack, user)
+    if not user then return itemstack end
+
+    local now = minetest.get_us_time() / 1000000
+    local meta = itemstack:get_meta()
+    local last_shot = meta:get_float("last_shot")
+
+    if now - last_shot < AUTO_BLASTER_COOLDOWN then
+        return itemstack
+    end
+    meta:set_float("last_shot", now)
+    user:get_inventory():set_stack("main", user:get_wield_index(), itemstack)
+
+    local pos = vector.copy(user:get_pos())
+    local dir = user:get_look_dir()
+    pos.y = pos.y + 1.5
+    pos = vector.add(pos, vector.multiply(dir, 1.2))
+
+    local obj = minetest.add_entity(pos, "star_wars:laser")
+    if obj then
+        local lua = obj:get_luaentity()
+        if lua then
+            lua.shooter = user
+            lua.last_pos = vector.new(pos)
+            lua.damage = 2
+            lua.vehicle_damage = 2
+            lua.speed = 40
+        end
+        obj:set_velocity(vector.multiply(dir, 40))
+        obj:set_acceleration({x = 0, y = 0, z = 0})
+    end
+
+    minetest.sound_play("star_wars_blaster_shot", {
+        object = user,
+        gain = 1.0,
+        max_hear_distance = 24,
+    })
+
+    return itemstack
+end
 
 minetest.register_craftitem("star_wars:auto_blaster", {
     stack_max = 1,
@@ -332,47 +373,6 @@ minetest.register_craftitem("star_wars:auto_blaster", {
     _vehicle_damage = 2,
     _speed = 40,
 
-    on_use = function(itemstack, user, pointed_thing)
-        if not user then
-            return itemstack
-        end
-
-        local now = minetest.get_us_time() / 1000000
-        local meta = itemstack:get_meta()
-        local last_shot = meta:get_float("last_shot")
-
-        if now - last_shot < AUTO_BLASTER_COOLDOWN then
-            return itemstack
-        end
-        meta:set_float("last_shot", now)
-
-        local pos = vector.copy(user:get_pos())
-        local dir = user:get_look_dir()
-
-        pos.y = pos.y + 1.5
-        pos = vector.add(pos, vector.multiply(dir, 1.2))
-
-        local obj = minetest.add_entity(pos, "star_wars:laser")
-        if obj then
-            local lua = obj:get_luaentity()
-            if lua then
-                lua.shooter = user
-                lua.last_pos = vector.new(pos)
-                lua.damage = 2
-                lua.vehicle_damage = 2
-                lua.speed = 40
-            end
-
-            obj:set_velocity(vector.multiply(dir, 40))
-            obj:set_acceleration({x = 0, y = 0, z = 0})
-        end
-
-        minetest.sound_play("star_wars_blaster_shot", {
-            object = user,
-            gain = 1.0,
-            max_hear_distance = 24,
-        })
-
-        return itemstack
-    end,
+    on_use  = function(itemstack, user, pointed_thing) return shoot_auto_blaster(itemstack, user) end,
+    on_place = function(itemstack, user, pointed_thing) return shoot_auto_blaster(itemstack, user) end,
 })
