@@ -249,29 +249,32 @@ local function ai_step(self, dtime, enemy_faction)
         end
     end 
 
-    -- Jump over obstacles
+-- Jump over obstacles
     self.jump_timer = (self.jump_timer or 0) + dtime
     if self.jump_timer > 0.1 then
         self.jump_timer = 0
         local vel = self.object:get_velocity()
-        if vel and vel.y > -1 and vel.y < 1 then
+        if self._is_jumping then
+            if vel and math.abs(vel.y) < 0.1 then
+                self._is_jumping = false
+            end
+        elseif vel then
             local yaw = self.object:get_yaw() or 0
             local dir = minetest.yaw_to_dir(yaw)
             local check = {x = pos.x + dir.x * 0.8, y = pos.y + 0.5, z = pos.z + dir.z * 0.8}
             local node = minetest.get_node(check)
             if node and minetest.registered_nodes[node.name]
             and minetest.registered_nodes[node.name].walkable then
+                self._is_jumping = true
                 self.object:set_velocity({
                     x = dir.x * MOVE_SPEED,
                     y = 4.5,
                     z = dir.z * MOVE_SPEED,
                 })
-            else
-                self.jump_timer = 0.09
             end
         end
     end
-end 
+end
 
 -- ============================================================
 -- YODA MOB
