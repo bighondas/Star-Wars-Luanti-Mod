@@ -2,9 +2,9 @@ colors={"blue", "green", "red", "purple", "yellow", "black"}
 
 colors_descriptions={"Blue", "Green", "Red", "Purple", "Yellow", "Black"}
 
-hilts={"single","cross","double"}
+hilts={"single","cross","double","curved","shoto"}
 
-hilts_descriptions={"Single","Cross","Double"}
+hilts_descriptions={"Single","Cross","Double","Curved","Shoto"}
 
 --===========================
 -- ORES
@@ -86,7 +86,6 @@ minetest.register_tool("star_wars:wrench", {
     description = "Wrench",
     inventory_image =  "wrench.png"
 })
-
 
 
 
