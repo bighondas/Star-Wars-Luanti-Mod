@@ -26,8 +26,8 @@ function star_wars.lightsaber_attack(player, pointed_thing, swing, clash)
     end
 end
 
-local colors = {"green", "blue", "red", "purple", "yellow"}
-local hilts = {"single", "cross", "double"}
+local colors = {"green", "blue", "red", "purple", "yellow", "white"}
+local hilts = {"single", "cross", "double", "curved", "shoto"}
 
 for _, color in ipairs(colors) do
     for _, hilt in ipairs(hilts) do
@@ -41,7 +41,7 @@ for _, color in ipairs(colors) do
                     if player:get_wielded_item():get_name() == "star_wars:lightsaber_cross_" .. color .. "_on" then
                         star_wars.play_sound(player, "star_wars_idle_cross")
                     elseif player:get_wielded_item():get_name() == "star_wars:lightsaber_single_" .. color .. "_on"
-                    or player:get_wielded_item():get_name() == "star_wars:lightsaber_double_" .. color .. "_on" then
+                    or player:get_wielded_item():get_name() == "star_wars:lightsaber_double_" .. color .. "_on" or player:get_wielded_item():get_name() == "star_wars:lightsaber_curved_" .. color .. "_on" then
                         star_wars.play_sound(player, "star_wars_idle")
                     end
                 end
@@ -338,6 +338,113 @@ function star_wars:register_lightsaber(hilt, color)
             groups = {not_in_creative_inventory = 1, lightsaber = 1},
         })
     end
+
+    -- Curved-Hilt Lightsaber
+
+    if hilt == "curved" then
+        minetest.register_craftitem("star_wars:lightsaber_curved_" .. color .. "_off", {
+            description = color:gsub("^%l", string.upper) .. " Curved Lightsaber",
+            inventory_image = "hilt_curved.png",
+            stack_max = 1,
+            wield_scale = {x = 2, y = 2, z = 1},
+            on_use = function(itemstack, player, pointed_thing)
+                local activate = "star_wars_activate"
+                itemstack:replace("star_wars:lightsaber_curved_" .. color .. "_on")
+                star_wars.play_sound(player, activate)
+                return itemstack
+            end,
+        })
+
+        minetest.register_craftitem("star_wars:lightsaber_curved_" .. color .. "_on", {
+            description = color:gsub("^%l", string.upper) .. " Curved Lightsaber",
+            inventory_image = "hilt_curved.png",
+            wield_image = "blade_single_" .. color .. ".png^lightsaber_curved.png",
+            wield_scale = {x = 2, y = 2, z = 1},
+            stack_max = 1,
+            range = 4,
+            light_source = 15,
+            on_use = function(itemstack, player, pointed_thing)
+                local swing = "star_wars_swing"
+                local clash = "star_wars_clash"
+                star_wars.lightsaber_attack(player, pointed_thing, swing, clash)
+            end,
+            on_secondary_use = function(itemstack, player, pointed_thing)
+                if player:get_player_control().sneak == true then
+                    local playername = player:get_player_name()
+                    if force_ability[playername] == "saber_throw" then
+                        star_wars:saber_throw(itemstack, player, hilt, color)
+                        return itemstack
+                    end
+                else
+                    local deactivate = "star_wars_deactivate"
+                    itemstack:replace("star_wars:lightsaber_curved_" .. color .. "_off")
+                    star_wars.play_sound(player, deactivate)
+                    return itemstack
+                end
+            end,
+            on_place = function(itemstack, player, pointed_thing)
+                local deactivate = "star_wars_deactivate"
+                itemstack:replace("star_wars:lightsaber_curved_" .. color .. "_off")
+                star_wars.play_sound(player, deactivate)
+                return itemstack
+            end,
+            groups = {not_in_creative_inventory = 1, lightsaber = 1},
+        })
+    end
+
+    -- Shot Lightsaber
+
+    if hilt == "shoto" then
+        minetest.register_craftitem("star_wars:lightsaber_shoto_" .. color .. "_off", {
+            description = color:gsub("^%l", string.upper) .. " Shoto Lightsaber",
+            inventory_image = "hilt_shoto.png",
+            stack_max = 1,
+            wield_scale = {x = 2, y = 2, z = 1},
+            on_use = function(itemstack, player, pointed_thing)
+                local activate = "star_wars_activate"
+                itemstack:replace("star_wars:lightsaber_shoto_" .. color .. "_on")
+                star_wars.play_sound(player, activate)
+                return itemstack
+            end,
+        })
+
+        minetest.register_craftitem("star_wars:lightsaber_shoto_" .. color .. "_on", {
+            description = color:gsub("^%l", string.upper) .. " Shoto Lightsaber",
+            inventory_image = "hilt_shoto.png",
+            wield_image = "blade_single_" .. color .. ".png^lightsaber_shoto.png",
+            wield_scale = {x = 2, y = 2, z = 1},
+            stack_max = 1,
+            range = 4,
+            light_source = 15,
+            on_use = function(itemstack, player, pointed_thing)
+                local swing = "star_wars_swing"
+                local clash = "star_wars_clash"
+                star_wars.lightsaber_attack(player, pointed_thing, swing, clash)
+            end,
+            on_secondary_use = function(itemstack, player, pointed_thing)
+                if player:get_player_control().sneak == true then
+                    local playername = player:get_player_name()
+                    if force_ability[playername] == "saber_throw" then
+                        star_wars:saber_throw(itemstack, player, hilt, color)
+                        return itemstack
+                    end
+                else
+                    local deactivate = "star_wars_deactivate"
+                    itemstack:replace("star_wars:lightsaber_shoto_" .. color .. "_off")
+                    star_wars.play_sound(player, deactivate)
+                    return itemstack
+                end
+            end,
+            on_place = function(itemstack, player, pointed_thing)
+                local deactivate = "star_wars_deactivate"
+                itemstack:replace("star_wars:lightsaber_shoto_" .. color .. "_off")
+                star_wars.play_sound(player, deactivate)
+                return itemstack
+            end,
+            groups = {not_in_creative_inventory = 1, lightsaber = 1},
+        })
+    end
+
 end
 
 for _, color in ipairs(colors) do
