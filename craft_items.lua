@@ -87,6 +87,16 @@ minetest.register_tool("star_wars:wrench", {
     inventory_image =  "wrench.png"
 })
 
+--===========================
+-- FROG
+--===========================
+
+minetest.register_craftitem("star_wars:arge_leg", {
+    description = "Arge Leg",
+    inventory_image =  "arge_leg.png",
+	on_use = minetest.item_eat (4) 
+})
+
 
 
 
