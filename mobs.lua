@@ -210,7 +210,7 @@ local function npc_shoot_step(self, dtime)
 
     local dist = vector.distance(pos, tpos)
     if dist > BLASTER_RANGE then return end
-  
+
     if not minetest.line_of_sight(
     {x = pos.x, y = pos.y + 1.0, z = pos.z},
     {x = tpos.x, y = tpos.y + 1.0, z = tpos.z}
@@ -678,12 +678,12 @@ minetest.register_entity("star_wars:luke_skywalker", {
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
 on_death = function(self, killer)
     local pos = self.object:get_pos()
-    
+
     if pos then
         if math.random(1, 100) <= 15 then
             minetest.add_item(pos, "star_wars:lightsaber_single_green_off")
         end
-        
+
         if self.inventory_slots then
             for _, item_string in pairs(self.inventory_slots) do
                 if item_string and item_string ~= "" then
@@ -724,12 +724,12 @@ minetest.register_entity("star_wars:anakin_skywalker", {
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
 on_death = function(self, killer)
     local pos = self.object:get_pos()
-    
+
     if pos then
         if math.random(1, 100) <= 15 then
             minetest.add_item(pos, "star_wars:lightsaber_single_blue_off")
         end
-        
+
         if self.inventory_slots then
             for _, item_string in pairs(self.inventory_slots) do
                 if item_string and item_string ~= "" then
@@ -770,12 +770,12 @@ minetest.register_entity("star_wars:obi_wan_kenobi", {
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
 on_death = function(self, killer)
     local pos = self.object:get_pos()
-    
+
     if pos then
         if math.random(1, 100) <= 15 then
             minetest.add_item(pos, "star_wars:lightsaber_single_blue_off")
         end
-        
+
         if self.inventory_slots then
             for _, item_string in pairs(self.inventory_slots) do
                 if item_string and item_string ~= "" then
@@ -816,12 +816,12 @@ minetest.register_entity("star_wars:qui_gon_jinn", {
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
 on_death = function(self, killer)
     local pos = self.object:get_pos()
-    
+
     if pos then
         if math.random(1, 100) <= 15 then
             minetest.add_item(pos, "star_wars:lightsaber_single_green_off")
         end
-        
+
         if self.inventory_slots then
             for _, item_string in pairs(self.inventory_slots) do
                 if item_string and item_string ~= "" then
@@ -862,12 +862,12 @@ minetest.register_entity("star_wars:darth_vader", {
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
 on_death = function(self, killer)
     local pos = self.object:get_pos()
-    
+
     if pos then
         if math.random(1, 100) <= 15 then
             minetest.add_item(pos, "star_wars:lightsaber_single_red_off")
         end
-        
+
         if self.inventory_slots then
             for _, item_string in pairs(self.inventory_slots) do
                 if item_string and item_string ~= "" then
@@ -906,25 +906,25 @@ minetest.register_entity("star_wars:darth_maul", {
         ai_step(self, dtime, "jedi", true)
     end,
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
-on_death = function(self, killer)
-    local pos = self.object:get_pos()
-    
-    if pos then
-        if math.random(1, 100) <= 15 then
-            minetest.add_item(pos, "star_wars:lightsaber_double_red_off")
-        end
-        
-        if self.inventory_slots then
-            for _, item_string in pairs(self.inventory_slots) do
-                if item_string and item_string ~= "" then
-                    if math.random(1, 100) <= 50 then
-                        minetest.add_item(pos, ItemStack(item_string))
+    on_death = function(self, killer)
+        local pos = self.object:get_pos()
+
+        if pos then
+            if math.random(1, 100) <= 15 then
+                minetest.add_item(pos, "star_wars:lightsaber_double_red_off")
+            end
+
+            if self.inventory_slots then
+                for _, item_string in pairs(self.inventory_slots) do
+                    if item_string and item_string ~= "" then
+                        if math.random(1, 100) <= 50 then
+                            minetest.add_item(pos, ItemStack(item_string))
+                        end
                     end
                 end
             end
         end
-    end
-end,
+    end,
 })
 
 -- ============================================================
@@ -952,25 +952,25 @@ minetest.register_entity("star_wars:count_dooku", {
         ai_step(self, dtime, "jedi", true)
     end,
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
-on_death = function(self, killer)
-    local pos = self.object:get_pos()
-    
-    if pos then
-        if math.random(1, 100) <= 15 then
-            minetest.add_item(pos, "star_wars:lightsaber_curved_red_off")
-        end
-        
-        if self.inventory_slots then
-            for _, item_string in pairs(self.inventory_slots) do
-                if item_string and item_string ~= "" then
-                    if math.random(1, 100) <= 50 then
-                        minetest.add_item(pos, ItemStack(item_string))
+    on_death = function(self, killer)
+        local pos = self.object:get_pos()
+
+        if pos then
+            if math.random(1, 100) <= 15 then
+                minetest.add_item(pos, "star_wars:lightsaber_curved_red_off")
+            end
+
+            if self.inventory_slots then
+                for _, item_string in pairs(self.inventory_slots) do
+                    if item_string and item_string ~= "" then
+                        if math.random(1, 100) <= 50 then
+                            minetest.add_item(pos, ItemStack(item_string))
+                        end
                     end
                 end
             end
         end
-    end
-end,
+    end,
 })
 
 -- ============================================================
@@ -998,25 +998,25 @@ minetest.register_entity("star_wars:darth_revan", {
         ai_step(self, dtime, "jedi", true)
     end,
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
-on_death = function(self, killer)
-    local pos = self.object:get_pos()
-    
-    if pos then
-        if math.random(1, 100) <= 30 then
-            minetest.add_item(pos, "star_wars:lightsaber_cross_red_off")
-        end
-        
-        if self.inventory_slots then
-            for _, item_string in pairs(self.inventory_slots) do
-                if item_string and item_string ~= "" then
-                    if math.random(1, 100) <= 50 then
-                        minetest.add_item(pos, ItemStack(item_string))
+    on_death = function(self, killer)
+        local pos = self.object:get_pos()
+
+        if pos then
+            if math.random(1, 100) <= 30 then
+                minetest.add_item(pos, "star_wars:lightsaber_cross_red_off")
+            end
+
+            if self.inventory_slots then
+                for _, item_string in pairs(self.inventory_slots) do
+                    if item_string and item_string ~= "" then
+                        if math.random(1, 100) <= 50 then
+                            minetest.add_item(pos, ItemStack(item_string))
+                        end
                     end
                 end
             end
         end
-    end
-end,
+    end,
 })
 
 -- ============================================================
@@ -1043,25 +1043,25 @@ minetest.register_entity("star_wars:stormtrooper", {
     on_step = function(self, dtime)
         ai_step(self, dtime, "jedi", false)
     end,
-on_death = function(self, killer)
-    local pos = self.object:get_pos()
-    
-    if pos then
-        if math.random(1, 100) <= 30 then
-            minetest.add_item(pos, "star_wars:blaster")
-        end
-        
-        if self.inventory_slots then
-            for _, item_string in pairs(self.inventory_slots) do
-                if item_string and item_string ~= "" then
-                    if math.random(1, 100) <= 50 then
-                        minetest.add_item(pos, ItemStack(item_string))
+    on_death = function(self, killer)
+        local pos = self.object:get_pos()
+
+        if pos then
+            if math.random(1, 100) <= 30 then
+                minetest.add_item(pos, "star_wars:blaster")
+            end
+
+            if self.inventory_slots then
+                for _, item_string in pairs(self.inventory_slots) do
+                    if item_string and item_string ~= "" then
+                        if math.random(1, 100) <= 50 then
+                            minetest.add_item(pos, ItemStack(item_string))
+                        end
                     end
                 end
             end
         end
-    end
-end,
+    end,
 })
 
 -- ============================================================
@@ -1114,25 +1114,25 @@ minetest.register_entity("star_wars:mandalorian", {
         ai_step(self, dtime, nil, true)
     end,
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
-on_death = function(self, killer)
-    local pos = self.object:get_pos()
-    
-    if pos then
-        if math.random(1, 100) <= 100 then
-            minetest.add_item(pos, "star_wars:darksaber_off")
-        end
-        
-        if self.inventory_slots then
-            for _, item_string in pairs(self.inventory_slots) do
-                if item_string and item_string ~= "" then
-                    if math.random(1, 100) <= 50 then
-                        minetest.add_item(pos, ItemStack(item_string))
+    on_death = function(self, killer)
+        local pos = self.object:get_pos()
+
+        if pos then
+            if math.random(1, 100) <= 100 then
+                minetest.add_item(pos, "star_wars:darksaber_off")
+            end
+
+            if self.inventory_slots then
+                for _, item_string in pairs(self.inventory_slots) do
+                    if item_string and item_string ~= "" then
+                        if math.random(1, 100) <= 50 then
+                            minetest.add_item(pos, ItemStack(item_string))
+                        end
                     end
                 end
             end
         end
-    end
-end,
+    end,
 })
 
 -- ============================================================
@@ -1161,30 +1161,33 @@ minetest.register_entity("star_wars:wookee", {
     end,
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
 
-on_death = function(self, killer)
-    local pos = self.object:get_pos()
-    
-    if pos then
-        if math.random(1, 100) <= 30 then
-            minetest.add_item(pos, "star_wars:auto_blaster")
-        end
-        
-        if self.inventory_slots then
-            for _, item_string in pairs(self.inventory_slots) do
-                if item_string and item_string ~= "" then
-                    if math.random(1, 100) <= 50 then
-                        minetest.add_item(pos, ItemStack(item_string))
+    on_death = function(self, killer)
+        local pos = self.object:get_pos()
+
+        if pos then
+            if math.random(1, 100) <= 30 then
+                minetest.add_item(pos, "star_wars:auto_blaster")
+            end
+
+            if self.inventory_slots then
+                for _, item_string in pairs(self.inventory_slots) do
+                    if item_string and item_string ~= "" then
+                        if math.random(1, 100) <= 50 then
+                            minetest.add_item(pos, ItemStack(item_string))
+                        end
                     end
                 end
             end
         end
-    end
-end,
+    end,
 })
 
 -- ============================================================
 -- ARGES FROG
 -- ============================================================
+local FROG_JUMP_INTERVAL = 1.2  -- seconds between hops
+local FROG_JUMP_FORCE    = 6    -- vertical
+local FROG_HOP_FORCE     = 3    -- horizontal
 
 minetest.register_entity("star_wars:arge_frog", {
     initial_properties = {
@@ -1197,32 +1200,136 @@ minetest.register_entity("star_wars:arge_frog", {
         makes_footstep_sound = true,
         hp_max = 5,
     },
-    is_npc = true,
-    move_timer = 0, idle_timer = 0, jump_timer = 0,
+    is_npc      = true,
+    _jump_timer = 0,
+    _is_jumping = false,
+
     on_activate = function(self)
         self.object:set_acceleration({x = 0, y = -10, z = 0})
         self.object:set_animation({x = 0, y = 79}, 15, 0, true)
+        self.object:set_yaw(math.pi)
+        self._jump_timer = 0
+        self._is_jumping = false
+        self._drown_timer = 0
     end,
+
     on_step = function(self, dtime)
-        ai_step(self, dtime, nil, false)
-    end,
-on_death = function(self, killer)
-    local pos = self.object:get_pos()
-    
-    if pos then
-        if math.random(1, 100) <= 100 then
-            minetest.add_item(pos, "star_wars:arge_leg")
+        local pos = self.object:get_pos()
+        local vel = self.object:get_velocity()
+        if not pos then return end
+
+        local foot_node = minetest.get_node(pos)
+        local in_water = foot_node.name == "default:river_water_source"
+            or foot_node.name == "default:water_source"
+            or foot_node.name == "default:river_water_flowing"
+            or foot_node.name == "default:water_flowing"
+
+        if in_water then
+            self._is_jumping = false
+            self._jump_timer = 0
+
+            -- Αργό ανέβασμα + κίνηση προς ξηρά
+            self._swim_timer = (self._swim_timer or 0) + dtime
+            if self._swim_timer >= 1.5 then
+                self._swim_timer = 0
+
+                -- Ψάξε ξηρά γύρω (8 block radius)
+                local best = nil
+                for _ = 1, 8 do
+                    local angle = math.random() * math.pi * 2
+                    local check = {
+                        x = pos.x + math.sin(angle) * math.random(2, 8),
+                        y = pos.y,
+                        z = pos.z + math.cos(angle) * math.random(2, 8)
+                    }
+                    local n = minetest.get_node(check)
+                    -- Ξηρά αλλά κοντά στο νερό
+                    if n.name ~= "default:river_water_source"
+                        and n.name ~= "default:water_source"
+                        and n.name ~= "air" then
+                        best = {angle = angle}
+                        break
+                    end
+                end
+
+                if best then
+                    local hx = math.sin(best.angle) * 2
+                    local hz = math.cos(best.angle) * 2
+                    self.object:set_yaw(-(best.angle) + math.pi * 2)
+                    self.object:set_velocity({x = hx, y = 3.5, z = hz})  -- ήρεμο ανέβασμα
+                else
+                    -- Μένει στο νερό, ανεβαίνει αργά
+                    self.object:set_velocity({x = 0, y = 0.5, z = 0})
+                end
+            end
+
+            self.object:set_acceleration({x = 0, y = -2, z = 0})  -- ελαφριά βαρύτητα στο νερό
+
+        else
+            self.object:set_acceleration({x = 0, y = -10, z = 0})
+
+            if self._is_jumping and math.abs(vel.y) < 0.1 then
+                self._is_jumping = false
+                self.object:set_velocity({x = 0, y = 0, z = 0})
+            end
+
+            self._jump_timer = (self._jump_timer or 0) + dtime
+            if self._jump_timer >= FROG_JUMP_INTERVAL and not self._is_jumping then
+                self._jump_timer = 0
+                self._is_jumping = true
+
+                -- Προτίμηση κατεύθυνσης προς νερό (μένει κοντά)
+                local best_angle = math.random() * math.pi * 2
+                local best_dist = math.huge
+                for _ = 1, 8 do
+                    local angle = math.random() * math.pi * 2
+                    local check = {
+                        x = pos.x + math.sin(angle) * 3,
+                        y = pos.y,
+                        z = pos.z + math.cos(angle) * 3
+                    }
+                    local n = minetest.get_node(check)
+                    if n.name == "default:river_water_source" or n.name == "default:water_source" then
+                        -- Κοντά στο νερό, προτίμησε αυτή την κατεύθυνση
+                        best_angle = angle
+                        best_dist = 0
+                        break
+                    end
+                end
+
+                local hx = math.sin(best_angle) * FROG_HOP_FORCE
+                local hz = math.cos(best_angle) * FROG_HOP_FORCE
+                self.object:set_yaw(-(best_angle) + math.pi * 2)
+                self.object:set_velocity({x = hx, y = FROG_JUMP_FORCE, z = hz})
+            end
         end
-        
-        if self.inventory_slots then
-            for _, item_string in pairs(self.inventory_slots) do
-                if item_string and item_string ~= "" then
-                    if math.random(1, 100) <= 50 then
-                        minetest.add_item(pos, ItemStack(item_string))
+    end,
+
+    on_death = function(self, killer)
+        local pos = self.object:get_pos()
+        if pos then
+            if math.random(1, 100) <= 50 then
+                minetest.add_item(pos, "star_wars:arge_leg")
+            end
+            if self.inventory_slots then
+                for _, item_string in pairs(self.inventory_slots) do
+                    if item_string and item_string ~= "" then
+                        if math.random(1, 100) <= 50 then
+                            minetest.add_item(pos, ItemStack(item_string))
+                        end
                     end
                 end
             end
         end
-    end
-end,
+    end,
+})
+
+creatura.register_abm_spawn("star_wars:arge_frog", {
+    chance = 10,
+    min_height = -1,
+    max_height = 128,
+    min_group = 1,
+    max_group = 3,
+    biomes = {"sorgan"},
+    nodes = {"default:river_water_source"},
 })
