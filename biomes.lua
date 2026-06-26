@@ -6,38 +6,25 @@ minetest.register_biome({
     depth_filler = 3,
     node_stone = "default:stone",
     y_min = 1,
-    y_max = 40,
+    y_max = 20,
     heat_point = 90,
     humidity_point = 95,
 })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+minetest.register_biome({
+    name = "sorgan",
+    node_top = "star_wars:sorgan_grass",
+    depth_top = 1,
+    node_filler = "default:dirt",
+    depth_filler = 3,
+    node_stone = "default:stone",
+    node_water = "default:river_water_source",
+    node_river_water = "default:river_water_source",
+    node_riverbed = "default:sand",
+    depth_riverbed = 2,
+    node_underwater = "default:sand",
+    y_min = -100,
+    y_max = 20,
+    heat_point = 50,
+    humidity_point = 70,
+})
