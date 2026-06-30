@@ -372,15 +372,15 @@ minetest.register_craft({
 	}
 })
 
+--==========================
+-- THE RANDOM STUFF I DON'T KNOW WHERE TO PUT
+--==========================
 
-
-
-
-
-
-
-
-
-
-
-
+minetest.register_craft({
+	output = "star_wars:gaffi_stick",
+	recipe = {
+		{"","","default:steel_ingot"},
+		{"","default:steel_ingot", ""},
+		{"default:steel_ingot","",""}
+	}
+})
