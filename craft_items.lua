@@ -94,48 +94,28 @@ minetest.register_tool("star_wars:wrench", {
 minetest.register_craftitem("star_wars:arge_leg", {
     description = "Arge Leg",
     inventory_image =  "arge_leg.png",
-	on_use = minetest.item_eat (4) 
+	on_use = minetest.item_eat (4)
 })
 
 minetest.register_craftitem("star_wars:cooked_arge_leg", {
     description = "Cooked Arge Leg",
     inventory_image =  "cooked_arge_leg.png",
-	on_use = minetest.item_eat (7) 
+	on_use = minetest.item_eat (7)
 })
 
+--===========================
+-- RANDOM STUFF I DON'T KNOW WHERE TO PUT
+--===========================
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+minetest.register_tool("star_wars:gaffi_stick", {
+    description = "Gaffi Stick",
+    inventory_image =  "gaffi_stick.png",
+    tool_capabilities = {
+    full_punch_interval = 0.8,
+    max_drop_level=1,
+    groupcaps={
+      snappy={times={[1]=2.5, [2]=1.20, [3]=0.35}, uses=30, maxlevel=2},
+    },
+    damage_groups = {fleshy=4},
+  },
+})
