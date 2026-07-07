@@ -67,5 +67,25 @@ Advance through the ranks by completing quests from **Yoda** (Jedi) or **Darth S
 * Vehicles can only be dismantled using the **Wrench** tool.
 * Fire blasters with the **Aux1** key (default **E**).
 
+ ## Upcoming Update 🚀
+
+The next major update will introduce **planet exploration**!
+
+Travel across the galaxy using the new **Rocket** vehicle and visit iconic Star Wars planets, including:
+
+* Tatooine
+* Dagobah
+* Sorgan
+* Mustafar
+* Hoth
+* Naboo
+* Endor
+* Utapau
+* Kashyyyk
+* Coruscant
+
+Select your destination from an in-game planet menu, launch into space, and seamlessly travel between worlds while staying inside your rocket. More planets and content are planned for future updates!
+
+
 May the Force be with you!
 
