@@ -48,6 +48,36 @@ Switch between your available Force abilities using the **Aux1** key (default **
 
 Advance through the ranks by completing quests from **Yoda** (Jedi) or **Darth Sidious** (Sith). Each new rank unlocks additional Force abilities.
 
+## NPCs & Creatures
+
+Encounter iconic Star Wars characters and creatures throughout the world!
+
+### Heroes & Villains
+
+* Yoda
+* Luke Skywalker
+* Anakin Skywalker
+* Obi-Wan Kenobi
+* Qui-Gon Jinn
+* Darth Sidious
+* Darth Vader
+* Darth Maul
+* Count Dooku
+* Darth Revan
+* The Mandalorian
+
+### Enemies & Creatures
+
+* Stormtroopers
+* Tusken Raiders
+* Wookiees
+* Ewoks
+* Jar Jar Binks
+* Arge Frogs
+
+NPCs feature advanced AI, including melee combat, blaster combat, lightsaber deflection, wandering, target detection, obstacle jumping, and faction-based battles.
+
+
 ## Features
 
 * Craftable lightsabers:
