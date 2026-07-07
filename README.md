@@ -1,3 +1,5 @@
-**Disclaimer:** This is an unofficial, fan-made Star Wars mod. It is not affiliated with or endorsed by Lucasfilm Ltd. or The Walt Disney Company. Star Wars and all related names, characters, and trademarks belong to their respective owners.
+## Disclaimer
 
-**WARNING:** When you download it extract it and then rename it to star_wars, else it won't work.
+This is an unofficial, fan-made Star Wars mod. It is not affiliated with, endorsed by, or sponsored by Lucasfilm Ltd. or The Walt Disney Company. Star Wars and all related names, characters, and trademarks are the property of their respective owners.
+
+**Important:** After downloading the mod, extract the archive and rename the folder to **`star_wars`**. Otherwise, the mod will not work correctly.
