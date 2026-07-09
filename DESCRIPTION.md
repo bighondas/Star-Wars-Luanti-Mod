@@ -97,9 +97,13 @@ NPCs feature advanced AI, including melee combat, blaster combat, lightsaber def
 * Vehicles can only be dismantled using the **Wrench** tool.
 * Fire blasters with the **Aux1** key (default **E**).
 
- ## Upcoming Update 🚀
+* Companion Droids:
 
-The next major update will introduce **planet exploration**!
+   * Give them Steel Ingots and they will automatically search for nearby vehicles and repair them over time.
+
+## Planets
+
+This major update introduces **planet exploration**!
 
 Travel across the galaxy using the new **Rocket** vehicle and visit iconic Star Wars planets, including:
 
@@ -110,12 +114,12 @@ Travel across the galaxy using the new **Rocket** vehicle and visit iconic Star 
 * Hoth
 * Naboo
 * Endor
-* Utapau
+* Geonosis
 * Kashyyyk
 * Coruscant
+* Deralia
 
-Select your destination from an in-game planet menu, launch into space, and seamlessly travel between worlds while staying inside your rocket. More planets and content are planned for future updates!
+Select your destination from an in-game planet menu, launch into space, and seamlessly travel between worlds while seeing various creatures. More content are planned for future updates!
 
 
 May the Force be with you!
-
