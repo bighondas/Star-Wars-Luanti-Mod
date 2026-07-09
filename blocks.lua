@@ -6,7 +6,7 @@ minetest.register_node("star_wars:mud", {
     description = "Mud",
     tiles = {"mud.png"},
     paramtype = "light",
-    groups = {crumbly = 3, soil = 1},
+    groups = {crumbly = 3},
     sounds = default.node_sound_dirt_defaults(),
     light_source = 3,
 })
@@ -60,4 +60,48 @@ minetest.register_node("star_wars:sorgan_grass", {
 	sounds = default.node_sound_dirt_defaults({
 		footstep = {name = "default_grass_footstep", gain = 0.25},
 	}),
+})
+
+minetest.register_node("star_wars:tatooine_sand", {
+	description = "Tatooine Sand",
+	tiles = {"tatooine_sand.png"},
+	groups = {crumbly = 3, falling_node = 1, sand = 1},
+	sounds = default.node_sound_sand_defaults(),
+	_tnt_loss = 2,
+})
+
+minetest.register_node("star_wars:mustafar_stone", {
+	description = "Mustafar Stone",
+	tiles = {"mustafar_stone.png"},
+	groups = {cracky = 3, stone = 1},
+	legacy_mineral = true,
+	sounds = default.node_sound_stone_defaults(),
+})
+
+minetest.register_node("star_wars:hoth_snow", {
+	description = "Hoth Snow",
+	tiles = {"hoth_snow.png"},
+	groups = {crumbly = 3, cools_lava = 1, snowy = 1},
+	sounds = default.node_sound_snow_defaults(),
+})
+
+minetest.register_node("star_wars:hoth_stone", {
+	description = "Hoth Stone",
+	tiles = {"hoth_stone.png"},
+	groups = {cracky = 3, stone = 1, cools_lava = 1, slippery = 1},
+	legacy_mineral = true,
+	sounds = default.node_sound_stone_defaults(),
+})
+
+minetest.register_node("star_wars:yellow_glass", {
+	description = "Yellow Glass",
+	drawtype = "glasslike_framed_optional",
+	tiles = {"yellow_glass.png", "yellow_glass_detail.png"},
+	use_texture_alpha = "clip",
+	paramtype = "light",
+	sunlight_propagates = true,
+	is_ground_content = false,
+	groups = {cracky = 3, oddly_breakable_by_hand = 3},
+	sounds = default.node_sound_glass_defaults(),
+	_tnt_loss = 2,
 })

@@ -184,7 +184,6 @@ minetest.register_entity("star_wars:laser", {
 
     if self.last_pos then
         local ray = minetest.raycast(self.last_pos, pos, true, false)
-
         for pointed in ray do
             if pointed.type == "object" then
                 local obj = pointed.ref
@@ -200,7 +199,7 @@ minetest.register_entity("star_wars:laser", {
                     end
 
                     if try_deflect(self, obj, pos) then
-                        return
+                       return
                     end
 
                     obj:punch(self.object, 1.0, {
@@ -208,10 +207,18 @@ minetest.register_entity("star_wars:laser", {
                         damage_groups = {fleshy = self.damage},
                     }, vector.normalize(vel))
 
+                    -- aggro
+                    local hit_ent = obj:get_luaentity()
+                    if hit_ent then
+                        local real_shooter = self.shooter
+                        if real_shooter and real_shooter:get_pos() then
+                            hit_ent._aggro_target = real_shooter
+                        end
+                    end
+
                     self.object:remove()
                     return
                 end
-
             elseif pointed.type == "node" then
                 self.object:remove()
                 return
@@ -244,6 +251,15 @@ minetest.register_entity("star_wars:laser", {
                         full_punch_interval = 0.1,
                         damage_groups = {fleshy = self.damage},
                     }, vector.normalize(vel))
+
+                    -- aggro
+                    local hit_ent = obj:get_luaentity()
+                    if hit_ent then
+                        local real_shooter = self.shooter
+                        if real_shooter and real_shooter:get_pos() then
+                            hit_ent._aggro_target = real_shooter
+                        end
+                    end
 
                     self.object:remove()
                     return

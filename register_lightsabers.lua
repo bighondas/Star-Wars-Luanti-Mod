@@ -26,7 +26,7 @@ function star_wars.lightsaber_attack(player, pointed_thing, swing, clash)
     end
 end
 
-local colors = {"green", "blue", "red", "purple", "yellow", "white"}
+local colors = {"green", "blue", "red", "purple", "yellow", "white", "pink"}
 local hilts = {"single", "cross", "double", "curved", "shoto"}
 
 for _, color in ipairs(colors) do

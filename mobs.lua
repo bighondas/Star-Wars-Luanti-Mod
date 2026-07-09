@@ -25,6 +25,18 @@ function star_wars.spawn_sidious_at(pos)
     add_entity_once({x = pos.x, y = pos.y + 4, z = pos.z}, "star_wars:darth_sidious")
 end
 
+function star_wars.spawn_raider_at(pos)
+    add_entity_once({x = pos.x, y = pos.y + 4, z = pos.z}, "star_wars:tusk_raider")
+end
+
+function star_wars.spawn_ewok_at(pos)
+    add_entity_once({x = pos.x, y = pos.y + 4, z = pos.z}, "star_wars:ewok")
+end
+
+function star_wars.spawn_wampa_at(pos)
+    add_entity_once({x = pos.x, y = pos.y + 4, z = pos.z}, "star_wars:wampa")
+end
+
 -- ============================================================
 -- ON PUNCH
 -- ============================================================
@@ -54,15 +66,19 @@ local NPC_WEAPON = {
     ["star_wars:anakin_skywalker"] = {type = "lightsaber", color = "blue",   hilt = "single"},
     ["star_wars:obi_wan_kenobi"]   = {type = "lightsaber", color = "blue",   hilt = "single"},
     ["star_wars:qui_gon_jinn"]     = {type = "lightsaber", color = "green",  hilt = "single"},
+    ["star_wars:mace_windu"]     = {type = "lightsaber", color = "purple",  hilt = "single"},
     ["star_wars:darth_sidious"]    = {type = "lightsaber", color = "red",    hilt = "single"},
     ["star_wars:darth_vader"]      = {type = "lightsaber", color = "red",    hilt = "single"},
     ["star_wars:darth_maul"]       = {type = "lightsaber", color = "red",    hilt = "double"},
+    ["star_wars:darth_malak"]      = {type = "lightsaber", color = "red",    hilt = "single"},
     ["star_wars:count_dooku"]      = {type = "lightsaber", color = "red",    hilt = "curved"},
-    ["star_wars:darth_revan"]      = {type = "lightsaber", color = "red",    hilt = "cross"},
+    ["star_wars:darth_revan"]      = {type = "lightsaber", color = "red",    hilt = "single"},
     ["star_wars:mandalorian"]      = {type = "darksaber"},
     ["star_wars:stormtrooper"]     = {type = "blaster"},
+    ["star_wars:boba_fett"]           = {type = "blaster"},
     ["star_wars:wookee"]           = {type = "auto_blaster"},
     ["star_wars:tusk_raider"] = {type = "gaffi"},
+    ["star_wars:wampa"] = {type = "gaffi"},
 }
 
 -- ============================================================
@@ -334,9 +350,11 @@ local NPC_FACTION = {
     ["star_wars:anakin_skywalker"]= "jedi",
     ["star_wars:obi_wan_kenobi"]  = "jedi",
     ["star_wars:qui_gon_jinn"]    = "jedi",
+    ["star_wars:mace_windu"]    = "jedi",
     ["star_wars:darth_sidious"]   = "sith",
     ["star_wars:darth_vader"]     = "sith",
     ["star_wars:darth_maul"]      = "sith",
+    ["star_wars:darth_malak"]     = "sith",
     ["star_wars:count_dooku"]     = "sith",
     ["star_wars:darth_revan"]     = "sith",
     ["star_wars:stormtrooper"]    = "sith",
@@ -455,6 +473,7 @@ local function ai_step(self, dtime, enemy_faction, aggro_any)
     if not pos then return end
 
     local weapon = NPC_WEAPON[self.name]
+    local speed_mult = self._speed_mult or 1
 
     self.move_timer   = (self.move_timer   or 0) + dtime
     self.attack_timer = (self.attack_timer or 0) + dtime
@@ -585,7 +604,7 @@ local function ai_step(self, dtime, enemy_faction, aggro_any)
                 if path_blocked_ahead(pos, yaw, 1.2) then
                     self.object:set_yaw(pick_wander_yaw(pos))
                 end
-                set_forward_velocity(self, MOVE_SPEED)
+                set_forward_velocity(self, MOVE_SPEED * speed_mult)
                 set_anim(self, "walk")
                 moving = true
             else
@@ -603,7 +622,7 @@ local function ai_step(self, dtime, enemy_faction, aggro_any)
                 self.wander_yaw = pick_wander_yaw(pos)
                 self.object:set_yaw(self.wander_yaw)
             end
-            set_forward_velocity(self, WANDER_SPEED)
+            set_forward_velocity(self, WANDER_SPEED * speed_mult)
             set_anim(self, "walk")
             moving = true
         end
@@ -653,7 +672,7 @@ minetest.register_entity("star_wars:yoda", {
         collisionbox = {-0.3, 0, -0.3, 0.3, 1.8, 0.3},
         visual = "mesh", mesh = "character.b3d",
         textures = {"yoda.png"},
-        visual_size = {x = 1.1, y = 1.1, z = 1.1},
+        visual_size = {x = .9, y = .9, z = .9},
         makes_footstep_sound = true,
         hp_max = 30,
     },
@@ -905,6 +924,52 @@ end,
 })
 
 -- ============================================================
+-- OBI WAN KENOBI
+-- ============================================================
+
+minetest.register_entity("star_wars:mace_windu", {
+    initial_properties = {
+        physical = true,
+        collisionbox = {-0.3, 0, -0.3, 0.3, 1.8, 0.3},
+        visual = "mesh", mesh = "character.b3d",
+        textures = {"mace_windu.png"},
+        visual_size = {x = 1.1, y = 1.1, z = 1.1},
+        makes_footstep_sound = true,
+        hp_max = 40,
+    },
+    is_npc = true,
+    move_timer = 0, attack_timer = 0, idle_timer = 0, jump_timer = 0,
+    on_activate = function(self)
+        self.object:set_acceleration({x = 0, y = -10, z = 0})
+        self.object:set_animation({x = 0, y = 79}, 15, 0, true)
+        attach_weapon(self)
+    end,
+    on_step = function(self, dtime)
+        ai_step(self, dtime, "sith", true)
+    end,
+    on_punch = function(self, puncher) default_on_punch(self, puncher) end,
+on_death = function(self, killer)
+    local pos = self.object:get_pos()
+
+    if pos then
+        if math.random(1, 100) <= 15 then
+            minetest.add_item(pos, "star_wars:lightsaber_single_purple_off")
+        end
+
+        if self.inventory_slots then
+            for _, item_string in pairs(self.inventory_slots) do
+                if item_string and item_string ~= "" then
+                    if math.random(1, 100) <= 50 then
+                        minetest.add_item(pos, ItemStack(item_string))
+                    end
+                end
+            end
+        end
+    end
+end,
+})
+
+-- ============================================================
 -- DARTH VADER
 -- ============================================================
 
@@ -997,6 +1062,52 @@ minetest.register_entity("star_wars:darth_maul", {
 })
 
 -- ============================================================
+-- DARTH MALAK
+-- ============================================================
+
+minetest.register_entity("star_wars:darth_malak", {
+    initial_properties = {
+        physical = true,
+        collisionbox = {-0.3, 0, -0.3, 0.3, 1.8, 0.3},
+        visual = "mesh", mesh = "character.b3d",
+        textures = {"darth_malak.png"},
+        visual_size = {x = 1.1, y = 1.1, z = 1.1},
+        makes_footstep_sound = true,
+        hp_max = 40,
+    },
+    is_npc = true,
+    move_timer = 0, attack_timer = 0, idle_timer = 0, jump_timer = 0,
+    on_activate = function(self)
+        self.object:set_acceleration({x = 0, y = -10, z = 0})
+        self.object:set_animation({x = 0, y = 79}, 15, 0, true)
+        attach_weapon(self)
+    end,
+    on_step = function(self, dtime)
+        ai_step(self, dtime, "jedi", true)
+    end,
+    on_punch = function(self, puncher) default_on_punch(self, puncher) end,
+on_death = function(self, killer)
+    local pos = self.object:get_pos()
+
+    if pos then
+        if math.random(1, 100) <= 15 then
+            minetest.add_item(pos, "star_wars:lightsaber_single_red_off")
+        end
+
+        if self.inventory_slots then
+            for _, item_string in pairs(self.inventory_slots) do
+                if item_string and item_string ~= "" then
+                    if math.random(1, 100) <= 50 then
+                        minetest.add_item(pos, ItemStack(item_string))
+                    end
+                end
+            end
+        end
+    end
+end,
+})
+
+-- ============================================================
 -- COUNT DOOKU
 -- ============================================================
 
@@ -1022,6 +1133,10 @@ minetest.register_entity("star_wars:count_dooku", {
     end,
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
     on_death = function(self, killer)
+        if self._boss_arena_id and star_wars.on_boss_dooku_death then
+            star_wars.on_boss_dooku_death(self)
+        end
+
         local pos = self.object:get_pos()
 
         if pos then
@@ -1072,7 +1187,7 @@ minetest.register_entity("star_wars:darth_revan", {
 
         if pos then
             if math.random(1, 100) <= 30 then
-                minetest.add_item(pos, "star_wars:lightsaber_cross_red_off")
+                minetest.add_item(pos, "star_wars:lightsaber_single_red_off")
             end
 
             if self.inventory_slots then
@@ -1180,7 +1295,7 @@ minetest.register_entity("star_wars:mandalorian", {
         attach_weapon(self)
     end,
     on_step = function(self, dtime)
-        ai_step(self, dtime, nil, true)
+        ai_step(self, dtime, nil, false)
     end,
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
     on_death = function(self, killer)
@@ -1226,7 +1341,7 @@ minetest.register_entity("star_wars:wookee", {
         attach_weapon(self)
     end,
     on_step = function(self, dtime)
-        ai_step(self, dtime, nil, true)
+        ai_step(self, dtime, nil, false)
     end,
     on_punch = function(self, puncher) default_on_punch(self, puncher) end,
 
@@ -1261,7 +1376,6 @@ local FROG_HOP_FORCE     = 3    -- horizontal
 minetest.register_entity("star_wars:arge_frog", {
     initial_properties = {
         physical = true,
-        collisionbox = {-0.3, 0, -0.3, 0.3, 1.8, 0.3},
         visual = "mesh",
         mesh = "arge_frog.obj",
         textures = {"arge_frog.png"},
@@ -1269,6 +1383,9 @@ minetest.register_entity("star_wars:arge_frog", {
         makes_footstep_sound = true,
         hp_max = 5,
     },
+    collisionbox = {-0.3, 0, -0.3, 0.3, 1.8, 0.3},
+    physical = true,
+
     is_npc      = true,
     _jump_timer = 0,
     _is_jumping = false,
@@ -1393,16 +1510,6 @@ minetest.register_entity("star_wars:arge_frog", {
     end,
 })
 
-creatura.register_abm_spawn("star_wars:arge_frog", {
-    chance = 10,
-    min_height = -1,
-    max_height = 128,
-    min_group = 1,
-    max_group = 3,
-    biomes = {"sorgan"},
-    nodes = {"default:river_water_source"},
-})
-
 -- ============================================================
 -- TUSK RAIDER
 -- ============================================================
@@ -1433,6 +1540,219 @@ minetest.register_entity("star_wars:tusk_raider", {
         if pos then
             if math.random(1, 100) <= 40 then
                 minetest.add_item(pos, "star_wars:gaffi_stick")
+            end
+        end
+    end,
+})
+
+-- ============================================================
+-- EWOK
+-- ============================================================
+
+minetest.register_entity("star_wars:ewok", {
+    initial_properties = {
+        physical = true,
+        collisionbox = {-0.3, 0, -0.3, 0.3, 1, 0.3},
+        visual = "mesh", mesh = "ewok.obj",
+        textures = {"ewok.png"},
+        visual_size = {x = 7, y = 7, z = 7},
+        makes_footstep_sound = true,
+        hp_max = 5,
+    },
+    is_npc = true,
+    move_timer = 0, idle_timer = 0, jump_timer = 0,
+    on_activate = function(self)
+        self.object:set_acceleration({x = 0, y = -10, z = 0})
+        self.object:set_animation({x = 0, y = 79}, 15, 0, true)
+    end,
+    on_step = function(self, dtime)
+        ai_step(self, dtime, nil, false)
+    end,
+})
+
+-- ============================================================
+-- JAWA
+-- ============================================================
+minetest.register_entity("star_wars:jawa", {
+    initial_properties = {
+        physical = true,
+        collisionbox = {-0.3, 0, -0.3, 0.3, 1.5, 0.3},
+        visual = "mesh", mesh = "character.b3d",
+        textures = {"jawa.png"},
+        visual_size = {x = 0.8, y = 0.8, z = 0.8},
+        makes_footstep_sound = true,
+        hp_max = 10,
+    },
+    is_npc = true,
+    move_timer = 0, idle_timer = 0, jump_timer = 0,
+    idle_sound_timer = 0,
+    idle_sound_interval = math.random(8, 15),
+    on_activate = function(self)
+        self.object:set_acceleration({x = 0, y = -10, z = 0})
+        self.object:set_animation({x = 0, y = 79}, 15, 0, true)
+        self.idle_sound_timer = 0
+        self.idle_sound_interval = math.random(8, 15)
+    end,
+    on_step = function(self, dtime)
+        ai_step(self, dtime, nil, false)
+
+        self.idle_sound_timer = self.idle_sound_timer + dtime
+        if self.idle_sound_timer >= self.idle_sound_interval then
+            self.idle_sound_timer = 0
+            self.idle_sound_interval = math.random(8, 15)
+            minetest.sound_play("jawa_idle", {
+                object = self.object,
+                gain = 1.0,
+                max_hear_distance = 16,
+            }, true)
+        end
+    end,
+})
+
+-- ============================================================
+-- BANTHA
+-- ============================================================
+
+minetest.register_entity("star_wars:bantha", {
+    initial_properties = {
+        visual = "mesh",
+        mesh = "bantha.obj",
+        textures = {"bantha.png"},
+        visual_size = {x = 10, y = 10, z = 10},
+        collisionbox = {-0.8, 0, -0.8, 0.8, 1.6, 0.8},
+        physical = true,
+        hp_max = 10,
+    },
+
+    on_activate = function(self, staticdata, dtime_s)
+        self.object:set_acceleration({x = 0, y = -10, z = 0})
+    end,
+    on_step = function(self, dtime)
+        ai_step(self, dtime, nil, false)
+    end,
+    on_death = function(self, killer)
+        local pos = self.object:get_pos()
+        if pos then
+            if math.random(1, 100) <= 50 then
+                minetest.add_item(pos, "star_wars:raw_bantha_meat")
+            end
+            if self.inventory_slots then
+                for _, item_string in pairs(self.inventory_slots) do
+                    if item_string and item_string ~= "" then
+                        if math.random(1, 100) <= 50 then
+                            minetest.add_item(pos, ItemStack(item_string))
+                        end
+                    end
+                end
+            end
+        end
+    end,
+})
+
+-- ============================================================
+-- WAMPA
+-- ============================================================
+
+minetest.register_entity("star_wars:wampa", {
+    collisionbox = {-0.3, 0, -0.3, 0.3, 1.8, 0.3},
+    physical = true,
+    initial_properties = {
+        physical = true,
+        collisionbox = {-0.3, 0, -0.3, 0.3, 4, 0.3},
+        visual = "mesh", mesh = "wampa.obj",
+        textures = {"wampa.png"},
+        visual_size = {x = 10, y = 10, z = 10},
+        makes_footstep_sound = true,
+        hp_max = 50,
+    },
+    is_npc = true,
+
+    on_activate = function(self)
+        self.object:set_acceleration({x = 0, y = -10, z = 0})
+        attach_weapon(self)
+    end,
+
+    on_step = function(self, dtime)
+        ai_step(self, dtime, nil, true)
+    end,
+
+    on_punch = function(self, puncher) default_on_punch(self, puncher) end,
+    on_death = function(self, killer)
+        local pos = self.object:get_pos()
+        if pos then
+            if math.random(1, 100) <= 100 then
+                minetest.add_item(pos, "star_wars:hoth_stone")
+            end
+        end
+    end,
+})
+
+-- ============================================================
+-- TAUNTAUN
+-- ============================================================
+
+minetest.register_entity("star_wars:tauntaun", {
+    initial_properties = {
+        visual = "mesh",
+        mesh = "tauntaun.obj",
+        textures = {"tauntaun.png"},
+        visual_size = {x = 10, y = 10, z = 10},
+        collisionbox = {-0.8, 0, -0.8, 0.8, 1.6, 0.8},
+        physical = true,
+        hp_max = 15,
+    },
+
+    on_activate = function(self, staticdata, dtime_s)
+        self.object:set_acceleration({x = 0, y = -10, z = 0})
+        self._speed_mult = 1.7
+    end,
+    on_step = function(self, dtime)
+        ai_step(self, dtime, nil, false)
+    end,
+})
+
+-- ============================================================
+-- BOBA FETT
+-- ============================================================
+
+minetest.register_entity("star_wars:boba_fett", {
+    initial_properties = {
+        physical = true,
+        collisionbox = {-0.3, 0, -0.3, 0.3, 1.8, 0.3},
+        visual = "mesh", mesh = "character.b3d",
+        textures = {"boba_fett.png"},
+        visual_size = {x = 1.1, y = 1.1, z = 1.1},
+        makes_footstep_sound = true,
+        hp_max = 30,
+    },
+    is_npc = true,
+    move_timer = 0, attack_timer = 0, idle_timer = 0, jump_timer = 0,
+    on_activate = function(self)
+        self.object:set_acceleration({x = 0, y = -10, z = 0})
+        self.object:set_animation({x = 0, y = 79}, 15, 0, true)
+        attach_weapon(self)
+    end,
+    on_step = function(self, dtime)
+        ai_step(self, dtime, nil, false)
+    end,
+    on_punch = function(self, puncher) default_on_punch(self, puncher) end,
+
+    on_death = function(self, killer)
+        local pos = self.object:get_pos()
+
+        if pos then
+            if math.random(1, 100) <= 30 then
+                minetest.add_item(pos, "star_wars:blaster")
+            end
+
+            if self.inventory_slots then
+                for _, item_string in pairs(self.inventory_slots) do
+                    if item_string and item_string ~= "" then
+                        if math.random(1, 100) <= 50 then
+                            minetest.add_item(pos, ItemStack(item_string))
+                        end
+                    end
+                end
             end
         end
     end,

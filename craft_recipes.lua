@@ -1,4 +1,4 @@
-local colors = {"green", "blue", "red", "purple", "yellow"}
+local colors = {"green", "blue", "red", "purple", "yellow", "pink"}
 local hilts = {"single", "cross", "double", "curved"}
 
 --==========================
@@ -82,14 +82,14 @@ for _, color in ipairs(colors) do
         }
     })
 
-    minetest.register_craft({
-        output = "star_wars:lightsaber_double_" .. color .. "_off",
-        recipe = {
-            {"", "", ""},
-            {"star_wars:" ..color.. "_kyber_crystal", "", ""},
-            {"star_wars:double_hilt", "", ""}
-        }
-    })
+		minetest.register_craft({
+		    output = "star_wars:lightsaber_double_" .. color .. "_off",
+		    recipe = {
+		        {"", "star_wars:" ..color.. "_kyber_crystal", ""},
+		        {"", "star_wars:double_hilt", ""},
+		        {"", "star_wars:" ..color.. "_kyber_crystal", ""}
+		    }
+		})
 
     minetest.register_craft({
         output = "star_wars:lightsaber_curved_" .. color .. "_off",
@@ -131,9 +131,9 @@ minetest.register_craft({
     minetest.register_craft({
         output = "star_wars:lightsaber_double_white_off",
         recipe = {
-            {"", "", ""},
-            {"star_wars:kyber_crystal", "", ""},
-            {"star_wars:double_hilt", "", ""}
+            {"", "star_wars:kyber_crystal", ""},
+            {"", "star_wars:double_hilt", ""},
+            {"", "star_wars:kyber_crystal", ""}
         }
     })
 
@@ -187,6 +187,10 @@ minetest.register_craft({
 })
 
 --==========================
+-- FUELS
+--==========================
+
+--==========================
 -- COOKING RECIPES
 --==========================
 
@@ -200,6 +204,18 @@ minetest.register_craft({
        type = "cooking",
        output = "star_wars:cooked_arge_leg",
        recipe = "star_wars:arge_leg",
+})
+
+minetest.register_craft({
+       type = "cooking",
+       output = "default:glass",
+       recipe = "star_wars:tatooine_sand",
+})
+
+minetest.register_craft({
+       type = "cooking",
+       output = "star_wars:cooked_bantha_meat",
+       recipe = "star_wars:raw_bantha_meat",
 })
 
 --==========================
@@ -266,6 +282,15 @@ minetest.register_craft({
 })
 
 minetest.register_craft({
+	output = "star_wars:yellow_glass",
+	recipe = {
+		{"","",""},
+		{"","default:glass","dye:yellow"},
+		{"","",""}
+	}
+})
+
+minetest.register_craft({
 	output = "star_wars:beskar_block",
 	recipe = {
 		{"star_wars:beskar_ingot","star_wars:beskar_ingot","star_wars:beskar_ingot"},
@@ -302,6 +327,15 @@ minetest.register_craft({
 		{"","",""},
 		{"star_wars:propeller","star_wars:engine", ""},
 		{"","",""}
+	}
+})
+
+minetest.register_craft({
+	output = "star_wars:rocket_item",
+	recipe = {
+		{"","default:steel_ingot",""},
+		{"star_wars:beskar_block","star_wars:engine", "star_wars:beskar_block"},
+		{"default:steel_ingot","default:steel_ingot","default:steel_ingot"}
 	}
 })
 

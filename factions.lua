@@ -177,9 +177,9 @@ end
 
 local function send_training_hint(name, faction)
     if faction == "jedi" then
-        minetest.chat_send_player(name, "To begin your Jedi training, find Yoda's Hut in a Dagobah biome.")
+        minetest.chat_send_player(name, "To begin your Jedi training, find Yoda's Hut on Dagobah.")
     elseif faction == "sith" then
-        minetest.chat_send_player(name, "To begin your Sith training, find a Sith Cave in a Grasslands biome.")
+        minetest.chat_send_player(name, "To begin your Sith training, find a Sith Cave on Naboo.")
     end
 end
 
@@ -247,8 +247,8 @@ end
 -- COMMANDS
 -- ============================================================
 
-minetest.register_privilege("rank", {
-	description = "Allows player use /rank command.",
+minetest.register_privilege("star_wars", {
+	description = "Allows player use the custom Star Wars commands.",
 	give_to_singleplayer = false
 })
 
@@ -281,7 +281,7 @@ minetest.register_chatcommand("team", {
 
 minetest.register_chatcommand("rank", {
 	description = "Set your rank: /rank <rank> | /rank max",
-	privs = { rank = true },
+	privs = { star_wars = true },
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)
 		if not player then

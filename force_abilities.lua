@@ -575,7 +575,8 @@ local function do_crystal_bond(player)
         "star_wars:blue_kyber_crystal",
         "star_wars:green_kyber_crystal",
         "star_wars:purple_kyber_crystal",
-        "star_wars:yellow_kyber_crystal"
+        "star_wars:yellow_kyber_crystal",
+        "star_wars:pink_kyber_crystal"
     }
     local new_item = ItemStack(crystals[math.random(1, #crystals)])
     new_item:set_count(1)
@@ -597,7 +598,14 @@ local function do_crystal_bleed(player)
         minetest.chat_send_player(player:get_player_name(), "You need to hold a Blank Kyber Crystal")
         return
     end
-    local result = math.random(1, 2) == 1 and "star_wars:purple_kyber_crystal" or "star_wars:red_kyber_crystal"
+
+    local bleed_results = {
+        "star_wars:purple_kyber_crystal",
+        "star_wars:red_kyber_crystal",
+        "star_wars:pink_kyber_crystal"
+    }
+    local result = bleed_results[math.random(1, 3)]
+
     local new_item = ItemStack(result)
     new_item:set_count(1)
     local inv = player:get_inventory()
@@ -606,7 +614,6 @@ local function do_crystal_bleed(player)
     inv:set_stack("main", wield_index, item)
     inv:add_item("main", new_item)
 end
-
 -- ============================================================
 -- SABER THROW (Both)
 -- ============================================================

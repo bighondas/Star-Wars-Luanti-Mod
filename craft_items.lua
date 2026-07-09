@@ -1,6 +1,6 @@
-colors={"blue", "green", "red", "purple", "yellow", "black"}
+colors={"blue", "green", "red", "purple", "yellow", "black", "pink"}
 
-colors_descriptions={"Blue", "Green", "Red", "Purple", "Yellow", "Black"}
+colors_descriptions={"Blue", "Green", "Red", "Purple", "Yellow", "Black", "Pink"}
 
 hilts={"single","cross","double","curved","shoto"}
 
@@ -77,6 +77,7 @@ minetest.register_craftitem("star_wars:tie_wing", {
     inventory_image =  "tie_wing.png"
 })
 
+
 minetest.register_craftitem("star_wars:propeller", {
     description = "Propeller",
     inventory_image =  "propeller.png"
@@ -88,7 +89,7 @@ minetest.register_tool("star_wars:wrench", {
 })
 
 --===========================
--- FROG
+-- FOOD
 --===========================
 
 minetest.register_craftitem("star_wars:arge_leg", {
@@ -101,6 +102,18 @@ minetest.register_craftitem("star_wars:cooked_arge_leg", {
     description = "Cooked Arge Leg",
     inventory_image =  "cooked_arge_leg.png",
 	on_use = minetest.item_eat (7)
+})
+
+minetest.register_craftitem("star_wars:raw_bantha_meat", {
+    description = "Raw Bantha Meat",
+    inventory_image =  "raw_bantha_meat.png",
+	on_use = minetest.item_eat (3)
+})
+
+minetest.register_craftitem("star_wars:cooked_bantha_meat", {
+    description = "Cooked Bantha Meat",
+    inventory_image =  "cooked_bantha_meat.png",
+	on_use = minetest.item_eat (8)
 })
 
 --===========================

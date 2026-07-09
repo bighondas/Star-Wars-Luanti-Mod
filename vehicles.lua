@@ -1,88 +1,52 @@
 local modname = minetest.get_current_modname()
 
 star_wars = star_wars or {}
-star_wars.flash_damage = flash_damage
-star_wars.vehicle_explode = vehicle_explode
-star_wars.apply_vehicle_hit = apply_vehicle_hit
 
---------------------------------------------------------------------------------
+--=======================================
 -- Vehicle health / combat defaults
---------------------------------------------------------------------------------
+--=======================================
 
 local BLASTER_SPEED    = 40
 local BLASTER_COOLDOWN = 0.15
 local BLASTER_DAMAGE   = 15
 
---------------------------------------------------------------------------------
+--=======================================
 -- Helpers
---------------------------------------------------------------------------------
+--=======================================
 
-local function get_vehicle_hit_zone(self, hit_pos)
-    local obj_pos = self.object and self.object:get_pos()
-    if not obj_pos or not hit_pos then
-        return nil
-    end
-
-    local yaw = self.object:get_yaw() or 0
-    local dir = minetest.yaw_to_dir(yaw)
-    local right = {x = -dir.z, y = 0, z = dir.x}
-
-    local rel = vector.subtract(hit_pos, obj_pos)
-
-    local forward = rel.x * dir.x + rel.z * dir.z
-    local side = rel.x * right.x + rel.z * right.z
-    local up = rel.y
-
-    if up < -0.2 or up > 2.8 then
-        return nil
-    end
-
-    if forward > 1.5 then
-        return "front"
-    elseif forward < -1.5 then
-        return "rear"
-    elseif side > 1.0 then
-        return "right"
-    elseif side < -1.0 then
-        return "left"
-    else
-        return "core"
-    end
+local function is_walkable_node(pos)
+    local node = minetest.get_node_or_nil(pos)
+    if not node then return false end
+    local def = minetest.registered_nodes[node.name]
+    return def and def.walkable or false
 end
 
-local function apply_vehicle_hit(self, hit_pos, dmg)
-    if not self or not self._vehicle_hp then
-        return false
-    end
+local function vehicle_has_ground_below(self)
+    local pos = self.object:get_pos()
+    if not pos then return false end
 
-    local zone = get_vehicle_hit_zone(self, hit_pos)
-    if not zone then
-        return false
-    end
+    local box = self.object:get_properties().collisionbox or {-1, -0.5, -1, 1, 1, 1}
+    local probe_y = pos.y + box[2] - 0.15
 
-    if zone ~= "front" and zone ~= "core" then
-        return false
-    end
+    local probes = {
+        {x = pos.x,     y = probe_y, z = pos.z},
+        {x = pos.x+0.9, y = probe_y, z = pos.z},
+        {x = pos.x-0.9, y = probe_y, z = pos.z},
+        {x = pos.x,     y = probe_y, z = pos.z+0.9},
+        {x = pos.x,     y = probe_y, z = pos.z-0.9},
+    }
 
-    self._vehicle_hp = (self._vehicle_hp or self._max_hp or 0) - (dmg or 0)
-
-    if self.flash_damage then
-        self:flash_damage()
-    elseif flash_damage then
-        flash_damage(self)
-    end
-
-    if self._vehicle_hp <= 0 then
-        if is_valid_player(puncher) and is_wrench(puncher) then
-            vehicle_break_no_explosion(self)
-        else
-            vehicle_explode(self)
+    for _, p in ipairs(probes) do
+        local node = minetest.get_node_or_nil(p)
+        if node then
+            local def = minetest.registered_nodes[node.name]
+            if def and def.walkable then
+                return true
+            end
         end
     end
-
-    return true
+    return false
 end
-
 local function is_valid_player(player)
     return player and player:is_player()
 end
@@ -167,7 +131,7 @@ local function get_exit_pos(self, side_sign)
     local pos  = self.object:get_pos()
     local yaw  = self.object:get_yaw() or 0
     local dir  = minetest.yaw_to_dir(yaw)
-    local side = {x = -dir.z, y = 0, z = dir.x}
+    local side = {x = -dir.z, y = self.object:get_velocity().y, z = dir.x}
     local dist = self.exit_distance or 2.0
     return {
         x = pos.x + side.x * dist * side_sign,
@@ -271,9 +235,9 @@ local function is_wrench(player)
     return stack and stack:get_name() == "star_wars:wrench"
 end
 
---------------------------------------------------------------------------------
+--=======================================
 -- Flash damage effect
---------------------------------------------------------------------------------
+--=======================================
 
 local function flash_damage(self)
     local obj = self.object
@@ -287,9 +251,9 @@ local function flash_damage(self)
     end)
 end
 
---------------------------------------------------------------------------------
--- Explosion helper
---------------------------------------------------------------------------------
+--=======================================
+-- Explosion helpers
+--=======================================
 
 local function vehicle_break_no_explosion(self)
     local pos = self.object:get_pos()
@@ -347,9 +311,75 @@ local function vehicle_explode(self)
     self.object:remove()
 end
 
---------------------------------------------------------------------------------
+--=======================================
+-- Vehicle hit zone / apply hit (zone-based damage, e.g. from lasers)
+--=======================================
+
+local function get_vehicle_hit_zone(self, hit_pos)
+    local obj_pos = self.object and self.object:get_pos()
+    if not obj_pos or not hit_pos then
+        return nil
+    end
+
+    local yaw = self.object:get_yaw() or 0
+    local dir = minetest.yaw_to_dir(yaw)
+    local right = {x = -dir.z, y = self.object:get_velocity().y, z = dir.x}
+
+    local rel = vector.subtract(hit_pos, obj_pos)
+
+    local forward = rel.x * dir.x + rel.z * dir.z
+    local side = rel.x * right.x + rel.z * right.z
+    local up = rel.y
+
+    if up < -0.2 or up > 2.8 then
+        return nil
+    end
+
+    if forward > 1.5 then
+        return "front"
+    elseif forward < -1.5 then
+        return "rear"
+    elseif side > 1.0 then
+        return "right"
+    elseif side < -1.0 then
+        return "left"
+    else
+        return "core"
+    end
+end
+
+local function apply_vehicle_hit(self, hit_pos, dmg, puncher)
+    if not self or not self._vehicle_hp then
+        return false
+    end
+
+    local zone = get_vehicle_hit_zone(self, hit_pos)
+    if not zone then
+        return false
+    end
+
+    if zone ~= "front" and zone ~= "core" then
+        return false
+    end
+
+    self._vehicle_hp = (self._vehicle_hp or self._max_hp or 0) - (dmg or 0)
+
+    flash_damage(self)
+
+    if self._vehicle_hp <= 0 then
+        if is_valid_player(puncher) and is_wrench(puncher) then
+            vehicle_break_no_explosion(self)
+        else
+            vehicle_explode(self)
+        end
+    end
+
+    return true
+end
+
+--=======================================
 -- Blaster firing
---------------------------------------------------------------------------------
+--=======================================
 
 local function fire_blaster(self, driver)
     local pos = self.object:get_pos()
@@ -405,9 +435,9 @@ local function fire_blaster(self, driver)
     end
 end
 
---------------------------------------------------------------------------------
+--=======================================
 -- Seat / interact callbacks
---------------------------------------------------------------------------------
+--=======================================
 
 local function vehicle_rightclick(self, clicker)
     if not is_valid_player(clicker) then return end
@@ -480,9 +510,9 @@ local function handle_passenger_exit(self)
     end
 end
 
---------------------------------------------------------------------------------
+--=======================================
 -- Activate / staticdata
---------------------------------------------------------------------------------
+--=======================================
 
 local function default_activate(self, staticdata, dtime_s)
     if staticdata and staticdata ~= "" then
@@ -507,7 +537,11 @@ local function default_activate(self, staticdata, dtime_s)
     self._shot_side      = 1
     self._prev_vel_y     = 0
     self._last_safe_pos  = self.object:get_pos()
+    self._car_yaw         = self.object:get_yaw() or 0
+    self._base_yaw = self._base_yaw or (self.object:get_yaw() or 0)
     self.seats           = {}
+    self._planet_menu_open = false
+    self._planet_origin_y = nil
 
     if self.object and self.object.set_armor_groups then
         self.object:set_armor_groups({immortal = 1})
@@ -525,9 +559,9 @@ local function default_staticdata(self)
     })
 end
 
---------------------------------------------------------------------------------
+--=======================================
 -- Crash detection
---------------------------------------------------------------------------------
+--=======================================
 
 local function check_vehicle_crash(self, vel)
     local pos = self.object:get_pos()
@@ -560,15 +594,52 @@ local function check_vehicle_crash(self, vel)
     return false
 end
 
---------------------------------------------------------------------------------
+--=======================================
+-- Rocket thrust particles
+--=======================================
+
+local function spawn_rocket_thrust_particles(self)
+    local pos = self.object:get_pos()
+    if not pos then return end
+
+    local props = self.object:get_properties()
+    local box = props and props.collisionbox or {-1, -1, -1, 1, 1, 1}
+    local bottom_y = pos.y + box[2]
+
+    minetest.add_particlespawner({
+        amount     = 8,
+        time       = 0.1,
+        minpos     = {x = pos.x - 0.3, y = bottom_y, z = pos.z - 0.3},
+        maxpos     = {x = pos.x + 0.3, y = bottom_y, z = pos.z + 0.3},
+        minvel     = {x = -0.5, y = -6,  z = -0.5},
+        maxvel     = {x = 0.5,  y = -10, z = 0.5},
+        minacc     = {x = 0, y = -2, z = 0},
+        maxacc     = {x = 0, y = -2, z = 0},
+        minexptime = 0.3,
+        maxexptime = 0.6,
+        minsize    = 1.0,
+        maxsize    = 2.5,
+        texture    = "star_wars_rocket_flame.png",
+    })
+end
+
+--=======================================
 -- Main step
---------------------------------------------------------------------------------
+--=======================================
 
 local function vehicle_step(self, dtime)
+
+    if self._planet_menu_open then
+        self.object:set_velocity({x=0,y=0,z=0})
+        self.object:set_acceleration({x=0,y=0,z=0})
+        return
+    end
+
     cleanup_missing_players(self)
     handle_passenger_exit(self)
 
     self._shoot_timer = (self._shoot_timer or 0) + dtime
+    self._base_yaw = self._base_yaw or (self.object:get_yaw() or 0)
 
     local vel = self.object:get_velocity()
     if vel and check_vehicle_crash(self, vel) then
@@ -586,21 +657,44 @@ local function vehicle_step(self, dtime)
         local player_yaw = driver:get_look_horizontal()
         local move_yaw   = player_yaw
 
-        if ctrl.up then
-            self.speed = math.min(self.speed + self.accel * dtime, self.max_speed)
-        elseif ctrl.down then
-            self.speed = math.max(self.speed - self.brake * dtime, 0)
-        else
-            self.speed = math.max(self.speed - self.friction * dtime, 0)
-        end
-
         if self.has_blasters and ctrl.aux1 and self._shoot_timer >= BLASTER_COOLDOWN then
             self._shoot_timer = 0
             fire_blaster(self, driver)
         end
 
-        if self.can_fly then
-            self.object:set_acceleration({x = 0, y = 0, z = 0})
+        if self.is_rocket then
+            local vspeed = self.rocket_vertical_speed or 10
+            local vel_y = ctrl.jump and vspeed or -vspeed
+
+            self.speed = 0
+            local gravity = tonumber(minetest.settings:get("movement_gravity")) or 9.81
+            self.object:set_acceleration({x = 0, y = -gravity, z = 0})
+            self.object:set_velocity({x = 0, y = vel_y, z = 0})
+
+            self._rocket_base_yaw = self._rocket_base_yaw or self._base_yaw or (self.object:get_yaw() or 0)
+            self.object:set_rotation({
+                x = pitch_offset,
+                y = self._rocket_base_yaw + yaw_offset,
+                z = roll_offset,
+            })
+
+            self._thrust_particle_timer = (self._thrust_particle_timer or 0) + dtime
+            if vel_y > 0 and self._thrust_particle_timer >= 0.1 then
+                self._thrust_particle_timer = 0
+                spawn_rocket_thrust_particles(self)
+            end
+
+        elseif self.can_fly then
+            if ctrl.up then
+                self.speed = math.min(self.speed + self.accel * dtime, self.max_speed)
+            elseif ctrl.down then
+                self.speed = math.max(self.speed - self.brake * dtime, 0)
+            else
+                self.speed = math.max(self.speed - self.friction * dtime, 0)
+            end
+
+            local gravity = tonumber(minetest.settings:get("movement_gravity")) or 9.81
+            self.object:set_acceleration({x = 0, y = -gravity, z = 0})
 
             local look_dir = driver:get_look_dir()
             local climb    = 0
@@ -625,38 +719,65 @@ local function vehicle_step(self, dtime)
                 y = move_yaw + yaw_offset,
                 z = roll_offset,
             })
-        else
-            local hover_y = self.hover_height or 0.5
-            local forward = minetest.yaw_to_dir(move_yaw)
 
-            self.object:set_acceleration({x = 0, y = 0, z = 0})
+            self._base_yaw = move_yaw
+
+        else
+            if ctrl.up then
+                self.speed = math.min(self.speed + self.accel * dtime, self.max_speed)
+            elseif ctrl.down then
+                self.speed = math.max(self.speed - self.brake * dtime, 0)
+            else
+                self.speed = math.max((self.speed or 0) - self.friction * dtime, 0)
+            end
+
+            local gravity = tonumber(minetest.settings:get("movement_gravity")) or 9.81
+            local yaw = player_yaw
+            local forward = minetest.yaw_to_dir(yaw)
+            local vel_now = self.object:get_velocity()
+            local on_ground = vehicle_has_ground_below(self)
+
+            self.object:set_acceleration({x = 0, y = -gravity, z = 0})
             self.object:set_velocity({
                 x = forward.x * self.speed,
-                y = 0,
+                y = on_ground and 0 or vel_now.y,
                 z = forward.z * self.speed,
             })
 
-            local pos = self.object:get_pos()
-            if pos then
-                self.object:set_pos({
-                    x = pos.x,
-                    y = self._spawn_base_y + hover_y,
-                    z = pos.z,
-                })
-            end
-
             self.object:set_rotation({
                 x = pitch_offset,
-                y = move_yaw + yaw_offset,
+                y = yaw + yaw_offset,
                 z = 0,
             })
+
+            self._base_yaw = yaw
         end
     else
-        local yaw = self.object:get_yaw() or 0
+        local yaw = self._base_yaw or self.object:get_yaw() or 0
 
-        if self.can_fly then
+        if self.is_rocket then
             local gravity = tonumber(minetest.settings:get("movement_gravity")) or 9.81
-            self.speed    = 0
+            self.speed = 0
+
+            self.object:set_acceleration({x = 0, y = -gravity, z = 0})
+
+            local vel2 = self.object:get_velocity()
+            self.object:set_velocity({
+                x = 0,
+                y = vel2.y,
+                z = 0,
+            })
+
+            self._rocket_base_yaw = self._rocket_base_yaw or yaw
+            self.object:set_rotation({
+                x = pitch_offset,
+                y = self._rocket_base_yaw + yaw_offset,
+                z = roll_offset,
+            })
+
+        elseif self.can_fly then
+            local gravity = tonumber(minetest.settings:get("movement_gravity")) or 9.81
+            self.speed = 0
 
             self.object:set_acceleration({x = 0, y = -gravity, z = 0})
 
@@ -667,8 +788,12 @@ local function vehicle_step(self, dtime)
                 z = vel2.z * 0.15,
             })
 
-            self.object:set_rotation({x = pitch_offset, y = yaw, z = roll_offset})
-        else
+            self.object:set_rotation({
+                x = pitch_offset,
+                y = yaw + yaw_offset,
+                z = roll_offset,
+            })
+       else
             self.speed = math.max((self.speed or 0) - self.friction * dtime, 0)
             local forward = minetest.yaw_to_dir(yaw)
 
@@ -679,15 +804,6 @@ local function vehicle_step(self, dtime)
                 z = forward.z * self.speed,
             })
 
-            local pos = self.object:get_pos()
-            if pos then
-                self.object:set_pos({
-                    x = pos.x,
-                    y = self._spawn_base_y + (self.hover_height or 0.5),
-                    z = pos.z,
-                })
-            end
-
             self.object:set_rotation({
                 x = pitch_offset,
                 y = yaw,
@@ -695,11 +811,42 @@ local function vehicle_step(self, dtime)
             })
         end
     end
+
+    local pos = self.object:get_pos()
+
+    if not self._planet_origin_y then
+        local planet = star_wars.dimensions.get_planet_at_y(pos.y)
+        self._planet_origin_y = star_wars.dimensions.planets[planet].y_base
+    end
+
+    if (not self._planet_menu_open)
+    and pos.y >= self._planet_origin_y + 300 then
+
+        self._planet_menu_open = true
+
+        self.object:set_velocity({x=0,y=0,z=0})
+        self.object:set_acceleration({x=0,y=0,z=0})
+
+        local driver2 = get_driver(self)
+        if driver2 then
+            local pname = driver2:get_player_name()
+
+            star_wars.dimensions.player_selection[pname] = nil
+            star_wars.dimensions.pending_rocket[pname] = self
+
+            minetest.show_formspec(
+                pname,
+                star_wars.dimensions.formname,
+                star_wars.dimensions.get_planet_formspec(nil)
+            )
+        end
+        return
+    end
 end
 
---------------------------------------------------------------------------------
+--=======================================
 -- Factory
---------------------------------------------------------------------------------
+--=======================================
 
 local function make_vehicle_def(data)
     return {
@@ -717,11 +864,12 @@ local function make_vehicle_def(data)
             hp_max               = 9999,
             armor_groups         = {immortal = 1},
         },
-        
 
         _base_texture           = data.texture,
 
         can_fly                 = data.can_fly or false,
+        is_rocket               = data.is_rocket or false,
+        rocket_vertical_speed   = data.rocket_vertical_speed or 10,
         has_blasters            = data.has_blasters or false,
         blaster_texture         = data.blaster_texture or nil,
         blaster_forward_offset  = data.blaster_forward_offset or 3.5,
@@ -744,6 +892,9 @@ local function make_vehicle_def(data)
         _shoot_timer            = 0,
         _hover_timer            = 0,
 
+        is_car                  = data.is_car or false,
+        reverse_speed           = data.reverse_speed or ((data.max_speed or 10) * 0.35),
+
         speed                   = 0,
         max_speed               = data.max_speed,
         accel                   = data.accel,
@@ -753,7 +904,6 @@ local function make_vehicle_def(data)
         exit_distance           = data.exit_distance or 2.0,
         exit_height             = data.exit_height or 0.5,
 
-        hover_height            = data.hover_height or 0,
         stop_on_exit            = data.stop_on_exit ~= false,
 
         crash_speed             = data.crash_speed or 20,
@@ -765,15 +915,7 @@ local function make_vehicle_def(data)
 
         drop_item               = data.drop_item,
 
-        on_activate             = function(self, staticdata, dtime_s)
-            default_activate(self, staticdata, dtime_s)
-            local pos = self.object:get_pos()
-            if pos then
-                self._spawn_base_y = pos.y - (self.hover_height or 0)
-            else
-                self._spawn_base_y = 0
-            end
-        end,
+        on_activate             = default_activate,
         get_staticdata          = default_staticdata,
         on_rightclick           = vehicle_rightclick,
         on_punch                = vehicle_on_punch,
@@ -784,9 +926,9 @@ local function make_vehicle_def(data)
     }
 end
 
---------------------------------------------------------------------------------
+--=======================================
 -- Seat definitions
---------------------------------------------------------------------------------
+--=======================================
 
 local SPEEDER_SEATS = {
     driver = {
@@ -796,6 +938,16 @@ local SPEEDER_SEATS = {
         eye_offset_third   ={x=0, y=8, z=-12},
         player_visual_size = {x=0.1, y=0.1},
         animation          = "sit",
+    },
+}
+
+local ROCKET_SEATS = {
+    driver = {
+        pos                = {x=0, y=2, z=0.4},
+        rot                = {x=0, y=180, z=0},
+        eye_offset_first   ={x=0, y=10, z=0},
+        eye_offset_third   ={x=0, y=10, z=-12},
+        player_visual_size = {x=0.1, y=0.1},
     },
 }
 
@@ -819,9 +971,9 @@ local TIE_SEATS = {
     },
 }
 
---------------------------------------------------------------------------------
+--=======================================
 -- Register entities
---------------------------------------------------------------------------------
+--=======================================
 
 minetest.register_entity(modname .. ":speeder", make_vehicle_def({
     mesh                = "star_wars_speeder.obj",
@@ -833,17 +985,18 @@ minetest.register_entity(modname .. ":speeder", make_vehicle_def({
     seat_order          = {"driver"},
     hp                  = 100,
     max_speed           = 14,
+    reverse_speed       = 5,
     accel               = 8,
     brake               = 10,
     model_yaw_offset    = math.pi,
     can_fly             = false,
+    is_car              = true,
     has_blasters        = false,
     friction            = 3,
     turn_speed          = 1.8,
     stepheight          = 1.1,
     exit_distance       = 2.5,
     exit_height         = 0.5,
-    hover_height        = 0.3,
     stop_on_exit        = true,
     min_collision_speed = 20,
     crash_speed         = 20,
@@ -851,6 +1004,37 @@ minetest.register_entity(modname .. ":speeder", make_vehicle_def({
     crash_forward_probe = 1.6,
     driver_crash_speed  = 20,
     drop_item           = modname .. ":speeder_item",
+}))
+
+minetest.register_entity(modname .. ":rocket", make_vehicle_def({
+    mesh                  = "star_wars_rocket.obj",
+    texture               = "star_wars_rocket.png",
+    visual_size           = {x=10, y=10},
+    selectionbox          = {-2.5, -0.5, -4.0, 2.5, 1.5, 4.0},
+    collisionbox          = {-2.5, -0.5, -4.0, 2.5, 1.5, 4.0},
+    seat_def              = ROCKET_SEATS,
+    seat_order            = {"driver"},
+    hp                    = 100,
+    max_speed             = 14,
+    accel                 = 8,
+    brake                 = 10,
+    model_yaw_offset      = math.pi,
+    can_fly               = true,
+    is_rocket             = true,
+    rocket_vertical_speed = 10,
+    has_blasters          = false,
+    friction              = 3,
+    turn_speed            = 1.8,
+    stepheight            = 1.1,
+    exit_distance         = 2.5,
+    exit_height           = 0.5,
+    stop_on_exit          = true,
+    min_collision_speed   = 20,
+    crash_speed           = 20,
+    crash_probe_depth     = 1.2,
+    crash_forward_probe   = 1.6,
+    driver_crash_speed    = 20,
+    drop_item             = modname .. ":rocket_item",
 }))
 
 minetest.register_entity(modname .. ":xwing", make_vehicle_def({
@@ -927,9 +1111,9 @@ minetest.register_entity(modname .. ":tie_advanced", make_vehicle_def({
     drop_item              = modname .. ":tie_advanced_item",
 }))
 
---------------------------------------------------------------------------------
+--=======================================
 -- Spawner items
---------------------------------------------------------------------------------
+--=======================================
 
 local function place_vehicle(itemstack, placer, pointed_thing, entity_name, height_offset)
     if pointed_thing.type ~= "node" then return itemstack end
@@ -956,6 +1140,15 @@ minetest.register_craftitem(modname .. ":speeder_item", {
     end,
 })
 
+minetest.register_craftitem(modname .. ":rocket_item", {
+    description     = "Rocket",
+    inventory_image = "star_wars_rocket_item.png",
+    stack_max       = 1,
+    on_place = function(itemstack, placer, pointed_thing)
+        return place_vehicle(itemstack, placer, pointed_thing, modname .. ":rocket", 1.0)
+    end,
+})
+
 minetest.register_craftitem(modname .. ":xwing_item", {
     description     = "X-Wing",
     inventory_image = "star_wars_xwing_item.png",
@@ -974,12 +1167,45 @@ minetest.register_craftitem(modname .. ":tie_advanced_item", {
     end,
 })
 
---------------------------------------------------------------------------------
+--=======================================
 -- Cleanup on leave
---------------------------------------------------------------------------------
+--=======================================
 
 minetest.register_on_leaveplayer(function(player)
     if player then
         reset_player_mount_state(player)
     end
 end)
+
+minetest.register_on_dieplayer(function(player)
+    if not player then
+        return
+    end
+
+    local name = player:get_player_name()
+
+    reset_player_mount_state(player)
+
+    for _, obj in ipairs(minetest.get_objects_inside_radius(player:get_pos(), 100)) do
+        local ent = obj and obj:get_luaentity()
+        if ent and ent.seats then
+            for seat_name, player_name in pairs(ent.seats) do
+                if player_name == name then
+                    ent.seats[seat_name] = nil
+
+                    if ent.stop_on_exit then
+                        ent.speed = 0
+                        obj:set_velocity({x=0, y=0, z=0})
+                        obj:set_acceleration({x=0, y=0, z=0})
+                    end
+
+                    break
+                end
+            end
+        end
+    end
+end)
+
+star_wars.flash_damage = flash_damage
+star_wars.vehicle_explode = vehicle_explode
+star_wars.apply_vehicle_hit = apply_vehicle_hit
