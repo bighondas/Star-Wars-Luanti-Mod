@@ -1,47 +1,3 @@
---[[minetest.register_biome({
-    name = "dagobah",
-    node_top = "star_wars:mud",
-    depth_top = 2,
-    node_filler = "default:dirt",
-    depth_filler = 3,
-    node_stone = "default:stone",
-    y_min = 1,
-    y_max = 20,
-    heat_point = 90,
-    humidity_point = 95,
-})
-
-minetest.register_biome({
-    name = "sorgan",
-    node_top = "star_wars:sorgan_grass",
-    depth_top = 1,
-    node_filler = "default:dirt",
-    depth_filler = 3,
-    node_stone = "default:stone",
-    node_water = "default:river_water_source",
-    node_river_water = "default:river_water_source",
-    node_riverbed = "default:sand",
-    depth_riverbed = 2,
-    node_underwater = "default:sand",
-    y_min = -100,
-    y_max = 20,
-    heat_point = 50,
-    humidity_point = 70,
-})
-
-minetest.register_biome({
-    name = "tatooine",
-    node_top = "star_wars:tatooine_sand",
-    depth_top = 4,
-    node_filler = "star_wars:tatooine_sand",
-    depth_filler = 1,
-    node_stone = "default:desert_stone",
-    y_min = -100,
-    y_max = 31000,
-    heat_point = 80,
-    humidity_point = 20,
-})--]]
-
 star_wars = star_wars or {}
 star_wars.dimensions = star_wars.dimensions or {}
 
@@ -65,6 +21,21 @@ star_wars.dimensions.terrain_config = {
                 chance = 0.000025,
                 place_offset_y = 0,
                 spawn_fn = "spawn_raider_at",
+            },
+            {
+                schematic = modpath .. "/schematics/jawa_sandcrawler.mts",
+                chance = 0.00002,
+                place_offset_y = 0,
+                spawn_fn = "spawn_jawa_at",
+                chest_nodes = { "default:chest" },
+                loot_table = {
+                   { name = "default:steel_ingot",      chance = 0.5,  min = 1, max = 6 },
+                   { name = "default:gold_ingot",       chance = 0.25, min = 1, max = 3 },
+                   { name = "default:mese_crystal",     chance = 0.1,  min = 1, max = 1 },
+                   { name = "default:torch",            chance = 0.6,  min = 3, max = 9 },
+                   { name = "star_wars:engine",      chance = 0.5,  min = 1, max = 3},
+                   { name = "star_wars:r4p17_spawn_egg",      chance = 0.2,  min = 1, max = 1 },
+               },
             },
         },
         mob_spawns = {
@@ -541,6 +512,87 @@ local function get_schematic_margin(schem, debug_label)
 end
 
 -- ============================================================
+-- STRUCTURE CHEST LOOT
+-- ============================================================
+-- Χρησιμοποιείται όταν ένα structure config έχει "loot_table".
+-- Δεν αγγίζει καθόλου το πώς τοποθετείται το schematic (τα chests
+-- μπαίνουν όπως είναι μέσα στο .mts, άδεια). Μετά το place_schematic
+-- σαρώνουμε την περιοχή του structure για nodes chest και γεμίζουμε
+-- το inventory του καθενός ανεξάρτητα, ρίχνοντας ζάρι ξεχωριστά για
+-- κάθε entry του loot_table.
+local DEFAULT_CHEST_NODES = { "default:chest" }
+
+local function fill_chest_with_loot(pos, loot_table)
+    local node = minetest.get_node(pos)
+    local def = minetest.registered_nodes[node.name]
+    if not def then
+        return
+    end
+
+    local meta = minetest.get_meta(pos)
+    local inv = meta:get_inventory()
+    local list_name = "main"
+
+    -- minetest.place_schematic γράφει τα nodes σαν raw data και ΔΕΝ καλεί
+    -- on_construct/after_place_node. Το default:chest (και παρόμοια nodes)
+    -- στήνουν το inventory τους μέσα στο δικό τους on_construct, οπότε
+    -- χωρίς αυτό το chest δεν έχει καν λίστα "main" -> size 0.
+    -- Το καλούμε εμείς χειροκίνητα μία φορά, σαν να το έβαλε παίκτης.
+    if inv:get_size(list_name) == 0 and def.on_construct then
+        def.on_construct(pos)
+        meta = minetest.get_meta(pos)
+        inv = meta:get_inventory()
+    end
+
+    local size = inv:get_size(list_name)
+    if size == 0 then
+        return
+    end
+
+    local empty_slots = {}
+    for i = 1, size do
+        if inv:get_stack(list_name, i):is_empty() then
+            table.insert(empty_slots, i)
+        end
+    end
+
+    for _, entry in ipairs(loot_table) do
+        if #empty_slots == 0 then
+            break
+        end
+
+        if math.random() <= (entry.chance or 1) then
+            local count = math.random(entry.min or 1, entry.max or 1)
+            local slot_idx = table.remove(empty_slots, math.random(#empty_slots))
+            inv:set_stack(list_name, slot_idx, ItemStack(entry.name .. " " .. count))
+        end
+    end
+end
+
+-- pos: το anchor point όπου τοποθετήθηκε το schematic (place_center_x, place_center_z)
+-- schem: το table που επέστρεψε το get_full_schematic (χρειαζόμαστε schem.size)
+function star_wars.dimensions.fill_structure_chests(pos, schem, loot_table, chest_nodes)
+    if not loot_table or type(schem) ~= "table" or not schem.size then
+        return
+    end
+
+    chest_nodes = chest_nodes or DEFAULT_CHEST_NODES
+
+    -- τετράγωνο περιθώριο (ίδια λογική με register_placed_box) ώστε να
+    -- καλύπτει σωστά την περιοχή ανεξάρτητα από τυχόν rotation
+    local half = math.ceil(math.max(schem.size.x, schem.size.z) / 2) + 2
+
+    local minp = { x = pos.x - half, y = pos.y - 1, z = pos.z - half }
+    local maxp = { x = pos.x + half, y = pos.y + schem.size.y + 1, z = pos.z + half }
+
+    local found = minetest.find_nodes_in_area(minp, maxp, chest_nodes)
+
+    for _, chest_pos in ipairs(found) do
+        fill_chest_with_loot(chest_pos, loot_table)
+    end
+end
+
+-- ============================================================
 -- CAVE NOISE (3D carving)
 -- ============================================================
 local DEFAULT_CAVE_CFG = {
@@ -894,6 +946,8 @@ local function generate_planet_chunk(minp, maxp, planet_name, cfg, y_base)
                                 spawn_fn = struct.spawn_fn,
                                 spawn_pos = spawn_pos,
                                 rotation = struct.rotation or "random",
+                                loot_table = struct.loot_table,
+                                chest_nodes = struct.chest_nodes,
                             })
 
                             -- Register right away so this same tick's remaining
@@ -1072,6 +1126,12 @@ local function generate_planet_chunk(minp, maxp, planet_name, cfg, y_base)
 
                     if p.spawn_fn and p.spawn_pos and star_wars[p.spawn_fn] then
                         star_wars[p.spawn_fn](p.spawn_pos)
+                    end
+
+                    if p.kind == "structure" and p.loot_table then
+                        star_wars.dimensions.fill_structure_chests(
+                            p.pos, p.schem, p.loot_table, p.chest_nodes
+                        )
                     end
                 end
             end
